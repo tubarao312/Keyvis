@@ -57,14 +57,14 @@ export default async function RootLayout({}: {}) {
                 </div>
                 <div className="flex flex-col rounded-lg bg-zinc-600/10 px-5 py-5 shadow-xl ring-1 ring-inset backdrop-blur-sm transition-all duration-75 ease-in-out dark:ring-white/10 dark:hover:bg-zinc-600/[0.12] dark:hover:ring-white/20 ">
                   <span className="flex flex-row gap-1.5">
-                    <h2 className="text-lg font-semibold">Mixer Risk:</h2>
+                    <h2 className="text-lg font-semibold">OpenAI Model:</h2>
                     <h2 className="text-lg font-semibold text-emerald-400">
-                      10
+                      gpt-3.5-turbo
                     </h2>
                   </span>
                   <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                    Perceived risk of interacting with a mixer like Tornado.Cash
-                    on the Ethereum blockhain. Affects the algorithm's results.
+                    Model used for processing financial reports. Tune for better
+                    performance and cost saving.
                   </p>
                   <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
                   <span className=" mt-3 flex flex-row gap-1.5">
