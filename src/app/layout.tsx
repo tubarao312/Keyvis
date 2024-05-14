@@ -231,8 +231,9 @@ const Variablea: FC<VariableCardProps> = ({
                 value={selectedType}
                 onChange={setSelectedType}
               >
-                {RADIO_GROUP_OPTIONS.map((option) => (
-                  <Radio
+                {RADIO_GROUP_OPTIONS.map((option, index) => (
+                  <Radio 
+                    key={index}
                     value={option}
                     className="group relative flex cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
                   >
@@ -257,8 +258,9 @@ const Variablea: FC<VariableCardProps> = ({
                 value={selectedFreeInputType}
                 onChange={setSelectedFreeInputType}
               >
-                {FREE_INPUT_VARIABLE_TYPES.map((option) => (
+                {FREE_INPUT_VARIABLE_TYPES.map((option, index) => (
                   <Radio
+                    key={index}
                     value={option}
                     className="group relative flex w-full cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
                   >
@@ -292,8 +294,9 @@ const Variablea: FC<VariableCardProps> = ({
           </p>
           <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
           <span className="mt-3 flex flex-row gap-1.5">
-            {tags.map((tag) => (
+            {tags.map((tag, index) => (
               <span
+                key={index}
                 className={`my-auto inline-flex h-fit rounded-full px-3 py-[0.09rem] text-xs font-semibold ring-1 ring-inset`}
               >
                 {tag.name}
@@ -382,7 +385,7 @@ const variables: Variable[] = [
   },
 ]
 
-export default async function RootLayout({}: {}) {
+export default function RootLayout({}: {}) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
@@ -391,21 +394,56 @@ export default async function RootLayout({}: {}) {
             <Layout>
               <div className="h-10" />
               <div className="flex flex-col gap-8">
-                <VariableCard
-                  variable={variables[0]}
-                  onStartEditing={() => {}}
-                  isEditing={false}
-                />
-                <VariableCard
-                  variable={variables[1]}
-                  onStartEditing={() => {}}
-                  isEditing={false}
-                />
-                <VariableCard
-                  variable={variables[2]}
-                  onStartEditing={() => {}}
-                  isEditing={false}
-                />
+                <div className="flex flex-col rounded-lg bg-zinc-600/10 px-5 py-5 shadow-xl ring-1 ring-inset backdrop-blur-sm transition-all duration-75 ease-in-out dark:ring-white/10 dark:hover:bg-zinc-600/[0.12] dark:hover:ring-white/20 ">
+                  <span className="flex flex-row gap-1.5">
+                    <h2 className="text-lg font-semibold">Algorithm Hops:</h2>
+                    <h2 className="text-lg font-semibold text-emerald-400">
+                      3
+                    </h2>
+                  </span>
+                  <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+                    How many hops the Ward Analytics algorithm will look for
+                    between blockchan transactions.
+                  </p>
+                  <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
+                  <span className=" mt-3 flex flex-row gap-1.5">
+                    <span className="my-auto inline-flex h-fit rounded-full bg-red-400/10 px-3 py-[0.09rem] text-xs font-medium text-red-400 ring-1 ring-inset ring-red-400/20">
+                      Dangerous
+                    </span>
+                    <span className="my-auto inline-flex h-fit  rounded-full bg-sky-400/10 px-3 py-[0.09rem] text-xs font-medium text-sky-400 ring-1 ring-inset ring-sky-400/20">
+                      Performance
+                    </span>
+                    <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+                    <span className="my-auto ml-auto flex flex-row gap-0.5">
+                      <TrashIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
+                      <PencilIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
+                    </span>
+                  </span>
+                </div>
+                <div className="flex flex-col rounded-lg bg-zinc-600/10 px-5 py-5 shadow-xl ring-1 ring-inset backdrop-blur-sm transition-all duration-75 ease-in-out dark:ring-white/10 dark:hover:bg-zinc-600/[0.12] dark:hover:ring-white/20 ">
+                  <span className="flex flex-row gap-1.5">
+                    <h2 className="text-lg font-semibold">Mixer Risk:</h2>
+                    <h2 className="text-lg font-semibold text-emerald-400">
+                      10
+                    </h2>
+                  </span>
+                  <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+                    Perceived risk of interacting with a mixer like Tornado.Cash
+                    on the Ethereum blockhain. Affects the algorithm&#39s results.
+                  </p>
+                  <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
+                  <span className=" mt-3 flex flex-row gap-1.5">
+                    <span className="my-auto inline-flex h-fit rounded-full bg-orange-400/10 px-3 py-[0.09rem] text-xs font-medium text-orange-400 ring-1 ring-inset ring-orange-400/20">
+                      Sensitive
+                    </span>
+
+                    <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+                    <span className="my-auto ml-auto flex flex-row gap-0.5">
+                      <TrashIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
+                      <PencilIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
+                    </span>
+                  </span>
+                </div>
               </div>
             </Layout>
           </div>
