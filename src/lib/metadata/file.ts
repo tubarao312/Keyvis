@@ -12,6 +12,7 @@ interface Variable {
     tags?: string[];
     defaultValue?: any;
     value: any;
+    history: any[];
 }
 
 // Options variable must have a default value and a list of options
@@ -41,7 +42,8 @@ export function addVariable({ name, description, tags, defaultValue, value }: Va
         description,
         tags,
         defaultValue,
-        value
+        value,
+        history: [value]
     };
 }
 
