@@ -1,58 +1,69 @@
-import fs from 'fs';
+import { Prisma } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-// This file will server as the "DB" for the metadata and state of the application
-enum VariableSelection {
-    Value,
-    Options
-}
-
-interface Variable {
-    name: string;
-    description: string;
-    tags?: string[];
-    defaultValue?: any;
-    value: any;
-    history: any[];
-}
-
-// Options variable must have a default value and a list of options
-function openMetadataFile(): Record<string, Variable> {
+export function addVariable({ name, description, value }: Prisma.VariableCreateInput) {
     try {
-        const data = fs.readFileSync('metadata.json', 'utf8');
-        return JSON.parse(data);
+        return prisma.variable.create({
+            data: {
+                name,
+                description,
+                value,
+                History: {
+                    create: {
+                        value
+                    }
+                }
+            }
+        });
     } catch (err) {
-        console.error(err);
-        throw new Error('Could not open metadata file');
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            if (err.code === 'P2002') {
+                throw new Error('Variable with that name already exists');
+            }
+        }
     }
 }
 
-
-export function addVariable({ name, description, tags, defaultValue, value }: Variable) {
-    const metadata = openMetadataFile();
-
-    // Check if the variable already exists
-    if (metadata[name]) {
-        // If it does, throw an error
-        throw new Error(`Variable ${name} already exists`);
-    }
-
-    // Create the variable
-    metadata[name] = {
-        name,
-        description,
-        tags,
-        defaultValue,
-        value,
-        history: [value]
-    };
+export function getVariable({ id }: Prisma.VariableWhereUniqueInput) {
+    return prisma.variable.findUnique({
+        where: { id }
+    });
 }
 
-export function readVariable(name: string) {
-    const metadata = openMetadataFile();
+export function getVariables() {
+    return prisma.variable.findMany();
+}
 
-    if (!metadata[name]) {
-        throw new Error(`Variable ${name} does not exist`);
+export function updateVariable({ id, description, value }: Prisma.VariableUpdateInput) {
+    if (!id) {
+        throw new Error('ID is required');
     }
 
-    return metadata[name];
+    // If no value is present then just update variable
+    if (!value) {
+        return prisma.variable.update({
+            where: { id: id as string },
+            data: { description }
+        });
+    }
+
+    // Else also add the value to the history
+    return prisma.variable.update({
+        where: { id: id as string },
+        data: {
+            description,
+            value,
+            History: {
+                create: {
+                    value: value as string
+                }
+            }
+        }
+    });
+}
+
+export function deleteVariable({ id }: Prisma.VariableWhereUniqueInput) {
+    return prisma.variable.delete({
+        where: { id }
+    });
 }

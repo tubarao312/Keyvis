@@ -1,4 +1,4 @@
-import redis from "./redis"
+import redis from "@/lib/redis"
 
 // There needs to be a functionality to have default values for the configurations 
 
