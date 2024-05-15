@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
 
-export function addVariable({ name, description, value }: Prisma.VariableCreateInput) {
+export async function createVariable({ name, description, value }: Prisma.VariableCreateInput) {
     try {
         return prisma.variable.create({
             data: {
@@ -24,17 +24,17 @@ export function addVariable({ name, description, value }: Prisma.VariableCreateI
     }
 }
 
-export function getVariable({ id }: Prisma.VariableWhereUniqueInput) {
+export async function getVariable({ id }: Prisma.VariableWhereUniqueInput) {
     return prisma.variable.findUnique({
         where: { id }
     });
 }
 
-export function getVariables() {
+export async function getVariables() {
     return prisma.variable.findMany();
 }
 
-export function updateVariable({ id, description, value }: Prisma.VariableUpdateInput) {
+export async function updateVariable({ id, description, value }: Prisma.VariableUpdateInput) {
     if (!id) {
         throw new Error('ID is required');
     }
@@ -62,7 +62,7 @@ export function updateVariable({ id, description, value }: Prisma.VariableUpdate
     });
 }
 
-export function deleteVariable({ id }: Prisma.VariableWhereUniqueInput) {
+export async function deleteVariable({ id }: Prisma.VariableWhereUniqueInput) {
     return prisma.variable.delete({
         where: { id }
     });
