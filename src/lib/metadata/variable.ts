@@ -115,6 +115,12 @@ export async function editTagColor({ id, color }: Prisma.TagUpdateInput) {
     });
 }
 
+export async function deleteTag({ id }: Prisma.TagWhereUniqueInput) {
+    return await prisma.tag.delete({
+        where: { id }
+    });
+}
+
 export async function addTagToVariable({ variableId, tagId }: { variableId: string, tagId: string }) {
     return await prisma.variable.update({
         where: { id: variableId },
