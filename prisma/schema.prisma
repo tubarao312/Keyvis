@@ -25,6 +25,7 @@ model Variable {
 
   // Relations
   History History[]
+  Tags    Tag[]
 }
 
 model History {
@@ -33,4 +34,12 @@ model History {
   value      String
   createdAt  DateTime @default(now())
   variable   Variable @relation(fields: [variableId], references: [id])
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  color String
+
+  Variables Variable[]
 }
