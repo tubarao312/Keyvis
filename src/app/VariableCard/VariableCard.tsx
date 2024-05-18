@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Badge, BadgeColor } from './Badge'
-import { ClipboardIcon } from '@heroicons/react/24/outline'
+import { CheckCircleIcon, ClipboardIcon } from '@heroicons/react/24/outline'
 import {
   CheckIcon,
   Cog6ToothIcon,
@@ -8,6 +8,8 @@ import {
   PlusCircleIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline'
+import { Radio, RadioGroup } from '@headlessui/react'
+import ButtonPatternBackground from './ButtonPatternBackground'
 
 /**
  * Contains the name and color of a tag for a variable
@@ -32,18 +34,10 @@ enum VariableTypes {
   TOGGLE = 'Toggle',
 }
 
-interface Dropdown {
-  type: VariableTypes.DROPDOWN
-  options: string[]
-}
-
-interface FreeInput {
-  type: VariableTypes.FREE_INPUT
-  inputType: FreeInputVariableTypes
-}
-
-interface Toggle {
-  type: VariableTypes.TOGGLE
+interface VariableType {
+  type: VariableTypes
+  options?: string[]
+  inputType?: FreeInputVariableTypes
 }
 
 /**
@@ -53,7 +47,7 @@ interface Toggle {
  */
 interface VariableValue {
   value: string | number | boolean
-  type: Dropdown | FreeInput | Toggle
+  type: VariableType
 }
 
 /**
@@ -68,6 +62,52 @@ interface Variable {
 }
 
 // Content ________________________________________________________
+
+interface VariableTypeRadioOption {
+  name: string
+  description: string
+  key: VariableTypes
+  value: VariableTypes
+}
+
+const VARIABLE_TYPE_GROUP_OPTIONS: VariableTypeRadioOption[] = [
+  {
+    name: 'Free Input',
+    description: 'Free input for the variable value.',
+    key: VariableTypes.FREE_INPUT,
+    value: VariableTypes.FREE_INPUT,
+  },
+  {
+    name: 'Dropdown',
+    description: 'Select from a list of predefined values.',
+    key: VariableTypes.DROPDOWN,
+    value: VariableTypes.DROPDOWN,
+  },
+  {
+    name: 'Toggle',
+    description: 'True or False value.',
+    key: VariableTypes.TOGGLE,
+    value: VariableTypes.TOGGLE,
+  },
+]
+
+const FREE_INPUT_VARIABLE_TYPES = [
+  {
+    name: 'String',
+    description: 'A string value.',
+    value: FreeInputVariableTypes.STRING,
+  },
+  {
+    name: 'Integer',
+    description: 'An integer value.',
+    value: FreeInputVariableTypes.INTEGER,
+  },
+  {
+    name: 'Float',
+    description: 'A floating-point value.',
+    value: FreeInputVariableTypes.FLOAT,
+  },
+]
 
 interface VariableContentProps {
   variable: Variable
@@ -173,9 +213,154 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
         <div className="flex flex-col gap-2">
           <h2 className=" text-base font-semibold">Type</h2>
           {/* TODO - Add radio group here */}
+          <RadioGroup
+            className="flex flex-col gap-4 lg:grid lg:grid-cols-2"
+            value={newVariable.value.type.type}
+            onChange={(value) =>
+              setNewVariable({
+                ...newVariable,
+                value: { ...newVariable.value, type: { type: value } },
+              })
+            }
+          >
+            {VARIABLE_TYPE_GROUP_OPTIONS.map((option) => (
+              <Radio
+                value={option.value}
+                key={option.key}
+                className="group relative flex cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
+              >
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-normal font-semibold">
+                    {option.name}
+                  </span>
+                  <span className="block text-sm text-zinc-600 lg:block dark:text-zinc-400">
+                    {option.description}
+                  </span>
+                </div>
+                <CheckCircleIcon className="ml-auto size-8 opacity-0 transition group-data-[checked]:opacity-100 dark:text-emerald-400" />
+                <ButtonPatternBackground />
+              </Radio>
+            ))}
+          </RadioGroup>
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-base font-semibold">Free Input</h2>
+          {newVariable.value.type.type === VariableTypes.FREE_INPUT && (
+            <>
+              <h2 className="text-base font-semibold">Free Input</h2>
+              <RadioGroup
+                className="flex flex-row gap-4"
+                value={newVariable.value.type.inputType}
+                onChange={(value) =>
+                  setNewVariable({
+                    ...newVariable,
+                    value: {
+                      ...newVariable.value,
+                      type: { ...newVariable.value.type, inputType: value },
+                    },
+                  })
+                }
+              >
+                {FREE_INPUT_VARIABLE_TYPES.map((option) => (
+                  <Radio
+                    value={option}
+                    className="group relative flex w-full cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
+                  >
+                    <div className="flex w-full flex-col gap-0.5">
+                      <span className="text-normal mx-auto font-semibold lg:mx-0">
+                        {option.name}
+                      </span>
+                      <span className="hidden text-sm text-zinc-600 lg:block dark:text-zinc-400">
+                        {option.description}
+                      </span>
+                    </div>
+                    <CheckCircleIcon className="ml-auto hidden size-8 opacity-0 transition group-data-[checked]:opacity-100 lg:block dark:text-emerald-400" />
+                    <ButtonPatternBackground />
+                  </Radio>
+                ))}
+              </RadioGroup>
+            </>
+          )}
+          {newVariable.value.type.type === VariableTypes.DROPDOWN && (
+            <>
+              <h2 className="text-base font-semibold">Dropdown</h2>
+              <div className="flex flex-col gap-2" id="variableTypeDropdown">
+                {newVariable.value.type.options?.map((option, index) => {
+                  return (
+                    <>
+                      <span className="flex flex-row gap-2" key={option}>
+                        <input
+                          className="block w-full max-w-[23rem] rounded-md border-0 bg-transparent px-3 py-1.5 text-zinc-900 shadow-sm outline-none ring-1 ring-inset transition-all duration-75 placeholder:text-zinc-400 focus:border-0 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 dark:text-zinc-200 dark:ring-white/10"
+                          placeholder="Example variable option"
+                          defaultValue={option}
+                          key={index}
+                          id={`option-${index}`}
+                          onBlur={(e) => {
+                            // Change current option to new value using index
+                            const newOptions =
+                              newVariable.value.type.options?.map((o, i) =>
+                                i === index ? e.target.value : o,
+                              ) || []
+
+                            setNewVariable({
+                              ...newVariable,
+                              value: {
+                                ...newVariable.value,
+                                type: {
+                                  ...newVariable.value.type,
+                                  options: newOptions,
+                                },
+                              },
+                            })
+                          }}
+                        />
+                        <TrashIcon
+                          className="my-auto h-5 w-5 cursor-pointer text-zinc-600 transition-all duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white"
+                          onClick={() => {
+                            // Remove current option using the index
+                            const newOptions =
+                              newVariable.value.type.options?.filter(
+                                (_, i) => i !== index,
+                              ) || []
+
+                            setNewVariable({
+                              ...newVariable,
+                              value: {
+                                ...newVariable.value,
+                                type: {
+                                  ...newVariable.value.type,
+                                  options: newOptions,
+                                },
+                              },
+                            })
+                          }}
+                        />
+                      </span>
+                    </>
+                  )
+                })}
+                <button
+                  className="flex h-full w-full max-w-[23rem] flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-zinc-600 outline-dashed outline-1 transition-all duration-150 ease-in-out hover:text-black hover:ring-white/20 data-[checked]:ring-2 dark:text-zinc-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:text-white dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
+                  onClick={() => {
+                    // Add new option
+                    const currentOptions = newVariable.value.type.options || []
+
+                    setNewVariable({
+                      ...newVariable,
+                      value: {
+                        ...newVariable.value,
+                        type: {
+                          ...newVariable.value.type,
+                          options: [...currentOptions, ''],
+                        },
+                      },
+                    })
+                  }}
+                >
+                  Add Option
+                </button>
+              </div>
+            </>
+          )}
           {/* TODO - Add radio group here */}
         </div>
       </div>
@@ -258,7 +443,7 @@ const VariableCard: React.FC<VariableCardProps> = ({
       className="flex flex-col rounded-lg px-5 py-5 shadow-xl ring-1 ring-inset ring-black/20 backdrop-blur-sm transition-all duration-500 ease-in-out hover:bg-zinc-300/10 dark:bg-zinc-600/10 dark:ring-white/10 dark:hover:bg-zinc-600/[0.12] dark:hover:ring-white/20 "
       style={{
         maxHeight: beingEdited ? '100rem' : '15rem',
-        minHeight: beingEdited ? '43rem' : '1rem',
+        minHeight: beingEdited ? '30rem' : '1rem',
       }}
     >
       {beingEdited ? (
@@ -282,9 +467,7 @@ export {
   type Variable,
   type VariableValue,
   type VariableTag,
-  type Dropdown,
-  type FreeInput,
-  type Toggle,
+  type VariableType,
   FreeInputVariableTypes,
   VariableTypes,
   VariableCard,
