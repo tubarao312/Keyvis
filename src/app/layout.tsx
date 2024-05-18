@@ -16,6 +16,7 @@ import {
   PencilIcon,
   CheckCircleIcon,
   Cog6ToothIcon,
+  ClipboardIcon,
 } from '@heroicons/react/24/outline'
 
 import { CheckIcon } from '@heroicons/react/20/solid'
@@ -65,7 +66,7 @@ const GlowyCard: FC<{}> = ({}) => {
   )
 }
 
-interface VariableTag {
+interface VariableTaga {
   name: string
   className: string
 }
@@ -74,7 +75,7 @@ enum VariableType {
   FREE_INPUT,
   DROPDOWN,
   BOOLEAN,
-  SLIDER,
+  // SLIDER,
 }
 
 interface VariableCardProps {
@@ -83,24 +84,6 @@ interface VariableCardProps {
   tags: VariableTag[]
   type: VariableType
   value: string | number | boolean
-}
-
-const DangerousTag: VariableTag = {
-  name: 'Dangerous',
-  className:
-    'dark:bg-red-400/10 dark:text-red-400 dark:ring-red-400/25 bg-red-50 text-red-700 ring-red-600/10',
-}
-
-const PerformanceTag: VariableTag = {
-  name: 'Performance',
-  className:
-    'dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/25 bg-blue-50 text-blue-700 ring-blue-600/10',
-}
-
-const SensitiveTag: VariableTag = {
-  name: 'Sensitive',
-  className:
-    'dark:bg-orange-400/10 dark:text-orange-400 dark:ring-orange-400/25 bg-orange-50 text-orange-700 ring-orange-600/10',
 }
 
 interface RadioGroupOption {
@@ -129,15 +112,35 @@ const RADIO_GROUP_OPTIONS: RadioGroupOption[] = [
     key: 'boolean',
     value: VariableType.BOOLEAN,
   },
+  // {
+  //   name: 'Slider',
+  //   description: 'Select a value from a range.',
+  //   key: 'slider',
+  //   value: VariableType.SLIDER,
+  // },
+]
+
+interface FreeInputVariableType {
+  name: string
+  description: string
+}
+
+const FREE_INPUT_VARIABLE_TYPES: FreeInputVariableType[] = [
   {
-    name: 'Slider',
-    description: 'Select a value from a range.',
-    key: 'slider',
-    value: VariableType.SLIDER,
+    name: 'Integer',
+    description: 'A whole number value.',
+  },
+  {
+    name: 'String',
+    description: 'A text value.',
+  },
+  {
+    name: 'Float',
+    description: 'A decimal number value.',
   },
 ]
 
-const Variable: FC<VariableCardProps> = ({
+const Variablea: FC<VariableCardProps> = ({
   name,
   description,
   tags,
@@ -149,24 +152,17 @@ const Variable: FC<VariableCardProps> = ({
     RADIO_GROUP_OPTIONS[0],
   )
 
-  let mouseX = useMotionValue(0)
-  let mouseY = useMotionValue(0)
+  const [selectedFreeInputType, setSelectedFreeInputType] =
+    useState<FreeInputVariableType>(FREE_INPUT_VARIABLE_TYPES[0])
 
-  function onMouseMove({
-    currentTarget,
-    clientX,
-    clientY,
-  }: React.MouseEvent<HTMLDivElement>) {
-    let { left, top } = currentTarget.getBoundingClientRect()
-    mouseX.set(clientX - left)
-    mouseY.set(clientY - top)
-  }
+  // Convert name to all caps and replace spaces with underscores
+  const variableName = name.toUpperCase().replaceAll(' ', '_')
 
   return (
     <div
       className="flex flex-col rounded-lg px-5 py-5 shadow-xl ring-1 ring-inset ring-black/20 backdrop-blur-sm transition-all duration-500 ease-in-out hover:bg-zinc-300/10 dark:bg-zinc-600/10 dark:ring-white/10 dark:hover:bg-zinc-600/[0.12] dark:hover:ring-white/20 "
       style={{
-        maxHeight: isEditing ? '100rem' : '10rem',
+        maxHeight: isEditing ? '100rem' : '15rem',
         minHeight: isEditing ? '43rem' : '1rem',
       }}
     >
@@ -194,12 +190,24 @@ const Variable: FC<VariableCardProps> = ({
 
             {/* Variable Name */}
             <div className="flex flex-col gap-2">
-              <h2 className=" text-base font-semibold">Variable Name</h2>
-              <input
-                id="variable-name"
-                className=" block max-w-[30rem] rounded-md border-0 bg-transparent px-3 py-1.5 text-zinc-900 shadow-sm outline-none ring-1 ring-inset transition-all duration-75 placeholder:text-zinc-400 focus:border-0 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 dark:text-zinc-200 dark:ring-white/10"
-                placeholder="Example Variable Name"
-              />
+              <h2 className="text-base font-semibold">Variable Name</h2>
+              <span className="flex w-full flex-col gap-2 lg:flex-row">
+                <input
+                  id="variable-name"
+                  className="block w-full max-w-[23rem] rounded-md border-0 bg-transparent px-3 py-1.5 text-zinc-900 shadow-sm outline-none ring-1 ring-inset transition-all duration-75 placeholder:text-zinc-400 focus:border-0 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 dark:text-zinc-200 dark:ring-white/10"
+                  placeholder="Example Variable Name"
+                />
+                <span className="flex flex-row gap-1">
+                  <p className="my-auto w-fit font-mono text-sm text-zinc-600 lg:mx-0 dark:text-zinc-400">
+                    {variableName}
+                  </p>
+                  <ClipboardIcon
+                    className="my-auto ml-1 h-5 w-5 cursor-pointer text-zinc-600 transition-all
+                  duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white
+                  "
+                  />
+                </span>
+              </span>
             </div>
 
             {/* Description  */}
@@ -219,7 +227,7 @@ const Variable: FC<VariableCardProps> = ({
             <div className="flex flex-col gap-2">
               <h2 className=" text-base font-semibold">Type</h2>
               <RadioGroup
-                className="grid grid-cols-2 gap-4"
+                className="flex flex-col gap-4 lg:grid lg:grid-cols-2"
                 value={selectedType}
                 onChange={setSelectedType}
               >
@@ -227,18 +235,43 @@ const Variable: FC<VariableCardProps> = ({
                   <Radio
                     value={option}
                     className="group relative flex cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
-                    onMouseMove={onMouseMove}
                   >
                     <div className="flex flex-col gap-0.5">
                       <span className="text-normal font-semibold">
+                        {option.name}
+                      </span>
+                      <span className="block text-sm text-zinc-600 lg:block dark:text-zinc-400">
+                        {option.description}
+                      </span>
+                    </div>
+                    <CheckCircleIcon className="ml-auto size-8 opacity-0 transition group-data-[checked]:opacity-100 dark:text-emerald-400" />
+                    <GlowyCard />
+                  </Radio>
+                ))}
+              </RadioGroup>
+            </div>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-base font-semibold">Free Input</h2>
+              <RadioGroup
+                className="flex flex-row gap-4"
+                value={selectedFreeInputType}
+                onChange={setSelectedFreeInputType}
+              >
+                {FREE_INPUT_VARIABLE_TYPES.map((option) => (
+                  <Radio
+                    value={option}
+                    className="group relative flex w-full cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
+                  >
+                    <div className="flex w-full flex-col gap-0.5">
+                      <span className="text-normal mx-auto font-semibold lg:mx-0">
                         {option.name}
                       </span>
                       <span className="hidden text-sm text-zinc-600 lg:block dark:text-zinc-400">
                         {option.description}
                       </span>
                     </div>
-                    <CheckCircleIcon className="ml-auto size-8 opacity-0 transition group-data-[checked]:opacity-100 dark:text-emerald-400" />
-                    <GlowyCard mouseX={mouseX} mouseY={mouseY} />
+                    <CheckCircleIcon className="ml-auto hidden size-8 opacity-0 transition group-data-[checked]:opacity-100 lg:block dark:text-emerald-400" />
+                    <GlowyCard />
                   </Radio>
                 ))}
               </RadioGroup>
@@ -258,10 +291,10 @@ const Variable: FC<VariableCardProps> = ({
             {description}
           </p>
           <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
-          <span className=" mt-3 flex flex-row gap-1.5">
+          <span className="mt-3 flex flex-row gap-1.5">
             {tags.map((tag) => (
               <span
-                className={`my-auto inline-flex h-fit rounded-full px-3 py-[0.09rem] text-xs font-semibold ring-1 ring-inset ${tag.className}`}
+                className={`my-auto inline-flex h-fit rounded-full px-3 py-[0.09rem] text-xs font-semibold ring-1 ring-inset`}
               >
                 {tag.name}
               </span>
@@ -282,6 +315,73 @@ const Variable: FC<VariableCardProps> = ({
   )
 }
 
+import {
+  Variable,
+  VariableCard,
+  VariableTag,
+  VariableTypes,
+  VariableValue,
+  FreeInputVariableTypes,
+} from './VariableCard/VariableCard'
+import { BadgeColor } from './VariableCard/Badge'
+
+const DangerousTag = {
+  name: 'Dangerous',
+  color: BadgeColor.RED,
+}
+
+const PerformanceTag = {
+  name: 'Performance',
+  color: BadgeColor.BLUE,
+}
+
+const SensitiveTag = {
+  name: 'Sensitive',
+  color: BadgeColor.ORANGE,
+}
+
+const variables: Variable[] = [
+  {
+    name: 'Food XP Multiplier',
+    description:
+      'How much XP users should gain per food point consumed or exceeded while in a hotel.',
+    tags: [DangerousTag, PerformanceTag],
+    value: {
+      type: {
+        type: VariableTypes.FREE_INPUT,
+        inputType: FreeInputVariableTypes.FLOAT,
+      },
+      value: 3.21,
+    },
+  },
+  {
+    name: 'Pet Revival Time (Hours)',
+    description:
+      'How many hours after the pet dies the user can take to revive it.',
+    tags: [DangerousTag],
+    value: {
+      type: {
+        type: VariableTypes.FREE_INPUT,
+        inputType: FreeInputVariableTypes.INTEGER,
+      },
+      value: 48,
+    },
+  },
+  {
+    name: 'OpenAI Model',
+    description:
+      'Model used for responding to PetBot users. Tune for better performance and cost saving.',
+    tags: [SensitiveTag],
+    value: {
+      type: {
+        type: VariableTypes.DROPDOWN,
+        options: ['gpt-3.5-turbo', 'gpt-4.0-turbo', 'gpt-4o'],
+      },
+      value: 'gpt-3.5-turbo',
+    },
+  },
+]
+
 export default async function RootLayout({}: {}) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
@@ -291,26 +391,20 @@ export default async function RootLayout({}: {}) {
             <Layout>
               <div className="h-10" />
               <div className="flex flex-col gap-8">
-                <Variable
-                  name="Food XP Multiplier"
-                  description="How much XP users should gain per food point consumed or exceeded while in a hotel."
-                  tags={[DangerousTag, PerformanceTag]}
-                  type={VariableType.FREE_INPUT}
-                  value={3.21}
+                <VariableCard
+                  variable={variables[0]}
+                  onStartEditing={() => {}}
+                  isEditing={false}
                 />
-                <Variable
-                  name="Pet Revival Time (Hours)"
-                  description="How many hours after the pet dies the user can take to revive it."
-                  tags={[DangerousTag]}
-                  type={VariableType.FREE_INPUT}
-                  value={48}
+                <VariableCard
+                  variable={variables[1]}
+                  onStartEditing={() => {}}
+                  isEditing={false}
                 />
-                <Variable
-                  name="OpenAI Model"
-                  description="Model used for responding to PetBot users. Tune for better performance and cost saving."
-                  tags={[SensitiveTag]}
-                  type={VariableType.DROPDOWN}
-                  value="gpt-3.5-turbo"
+                <VariableCard
+                  variable={variables[2]}
+                  onStartEditing={() => {}}
+                  isEditing={false}
                 />
               </div>
             </Layout>
