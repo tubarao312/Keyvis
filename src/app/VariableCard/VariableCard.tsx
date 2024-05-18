@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { Badge, BadgeColor } from './Badge'
-import { CheckCircleIcon, ClipboardIcon } from '@heroicons/react/24/outline'
+import {
+  CheckCircleIcon,
+  ClipboardIcon,
+  PlusIcon,
+} from '@heroicons/react/24/outline'
 import {
   CheckIcon,
   Cog6ToothIcon,
@@ -339,7 +343,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
                   )
                 })}
                 <button
-                  className="flex h-full w-full max-w-[23rem] flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-zinc-600 outline-dashed outline-1 transition-all duration-150 ease-in-out hover:text-black hover:ring-white/20 data-[checked]:ring-2 dark:text-zinc-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:text-white dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
+                  className="group flex h-full w-full max-w-[23rem] flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-zinc-600 outline-dashed outline-1 transition-all duration-150 ease-in-out hover:text-black hover:ring-white/20 data-[checked]:ring-2 dark:text-zinc-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:text-white dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
                   onClick={() => {
                     // Add new option
                     const currentOptions = newVariable.value.type.options || []
@@ -356,6 +360,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
                     })
                   }}
                 >
+                  <PlusIcon className="mr-1.5 h-5 w-5 text-zinc-600 duration-150 ease-in-out group-hover:text-black dark:text-zinc-400 dark:group-hover:text-white " />
                   Add Option
                 </button>
               </div>
