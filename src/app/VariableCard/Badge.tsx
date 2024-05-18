@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-export enum BadgeColor {
+enum BadgeColor {
   RED = 'Red',
   GREEN = 'Green',
   BLUE = 'Blue',
@@ -44,4 +44,4 @@ const Badge: React.FC<BadgeProps> = ({ color, text, Icon }) => {
   )
 }
 
-export default Badge
+export { Badge, BadgeColor }
