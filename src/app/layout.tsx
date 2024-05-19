@@ -1,22 +1,14 @@
 'use client'
 
-import { type Metadata } from 'next'
-import React from 'react'
-
-import { FC, useState } from 'react'
+import React, { FC } from 'react'
 
 import { Providers } from '@/app/providers'
 import { Layout } from '@/components/Layout'
 
-import { CheckIcon } from '@heroicons/react/20/solid'
-
 import '@/styles/tailwind.css'
 import { GridPattern } from '@/components/GridPattern'
 import {
-  type MotionValue,
   motion,
-  useMotionTemplate,
-  useMotionValue,
 } from 'framer-motion'
 
 const GlowyCard: FC<{}> = ({}) => {
@@ -55,7 +47,7 @@ const GlowyCard: FC<{}> = ({}) => {
   )
 }
 
-export default function RootLayout({children} : {children: React.ReactNode}) {
+export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
@@ -70,3 +62,4 @@ export default function RootLayout({children} : {children: React.ReactNode}) {
     </html>
   )
 }
+

@@ -1,64 +1,91 @@
 import {
-    PlusCircleIcon,
-    TrashIcon,
-    PencilIcon,
-  } from '@heroicons/react/24/outline'
+    Variable,
+    VariableCard,
+    VariableTag,
+    VariableTypes,
+    VariableValue,
+    FreeInputVariableTypes,
+  } from './VariableCard/VariableCard'
+  import { BadgeColor } from './VariableCard/Badge'
+  
+  const DangerousTag = {
+    name: 'Dangerous',
+    color: BadgeColor.RED,
+  }
+  
+  const PerformanceTag = {
+    name: 'Performance',
+    color: BadgeColor.BLUE,
+  }
+  
+  const SensitiveTag = {
+    name: 'Sensitive',
+    color: BadgeColor.ORANGE,
+  }
+
+const variables: Variable[] = [
+    {
+      name: 'Food XP Multiplier',
+      description:
+        'How much XP users should gain per food point consumed or exceeded while in a hotel.',
+      tags: [DangerousTag, PerformanceTag],
+      value: {
+        type: {
+          type: VariableTypes.FREE_INPUT,
+          inputType: FreeInputVariableTypes.FLOAT,
+        },
+        value: 3.21,
+      },
+    },
+    {
+      name: 'Pet Revival Time (Hours)',
+      description:
+        'How many hours after the pet dies the user can take to revive it.',
+      tags: [DangerousTag],
+      value: {
+        type: {
+          type: VariableTypes.FREE_INPUT,
+          inputType: FreeInputVariableTypes.INTEGER,
+        },
+        value: 48,
+      },
+    },
+    {
+      name: 'OpenAI Model',
+      description:
+        'Model used for responding to PetBot users. Tune for better performance and cost saving.',
+      tags: [SensitiveTag],
+      value: {
+        type: {
+          type: VariableTypes.DROPDOWN,
+          options: ['gpt-3.5-turbo', 'gpt-4.0-turbo', 'gpt-4o'],
+        },
+        value: 'gpt-3.5-turbo',
+      },
+    },
+  ]
+  
 
 export default function Home() {
     return (
         <>
-            <div className="h-10" />
+        <div className="h-10"/>
             <div className="flex flex-col gap-8">
-            <div className="flex flex-col rounded-lg bg-zinc-600/10 px-5 py-5 shadow-xl ring-1 ring-inset backdrop-blur-sm transition-all duration-75 ease-in-out dark:ring-white/10 dark:hover:bg-zinc-600/[0.12] dark:hover:ring-white/20 ">
-                <span className="flex flex-row gap-1.5">
-                <h2 className="text-lg font-semibold">Algorithm Hops:</h2>
-                <h2 className="text-lg font-semibold text-emerald-400">
-                    3
-                </h2>
-                </span>
-                <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                How many hops the Ward Analytics algorithm will look for
-                between blockchan transactions.
-                </p>
-                <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
-                <span className=" mt-3 flex flex-row gap-1.5">
-                <span className="my-auto inline-flex h-fit rounded-full bg-red-400/10 px-3 py-[0.09rem] text-xs font-medium text-red-400 ring-1 ring-inset ring-red-400/20">
-                    Dangerous
-                </span>
-                <span className="my-auto inline-flex h-fit  rounded-full bg-sky-400/10 px-3 py-[0.09rem] text-xs font-medium text-sky-400 ring-1 ring-inset ring-sky-400/20">
-                    Performance
-                </span>
-                <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-                <span className="my-auto ml-auto flex flex-row gap-0.5">
-                    <TrashIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
-                    <PencilIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
-                </span>
-                </span>
-            </div>
-            <div className="flex flex-col rounded-lg bg-zinc-600/10 px-5 py-5 shadow-xl ring-1 ring-inset backdrop-blur-sm transition-all duration-75 ease-in-out dark:ring-white/10 dark:hover:bg-zinc-600/[0.12] dark:hover:ring-white/20 ">
-                <span className="flex flex-row gap-1.5">
-                <h2 className="text-lg font-semibold">Mixer Risk:</h2>
-                <h2 className="text-lg font-semibold text-emerald-400">
-                    10
-                </h2>
-                </span>
-                <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                Perceived risk of interacting with a mixer like Tornado.Cash
-                on the Ethereum blockhain. Affects the algorithm&#39s results.
-                </p>
-                <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
-                <span className=" mt-3 flex flex-row gap-1.5">
-                <span className="my-auto inline-flex h-fit rounded-full bg-orange-400/10 px-3 py-[0.09rem] text-xs font-medium text-orange-400 ring-1 ring-inset ring-orange-400/20">
-                    Sensitive
-                </span>
-
-                <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-                <span className="my-auto ml-auto flex flex-row gap-0.5">
-                    <TrashIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
-                    <PencilIcon className="h-9 w-9 rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400" />
-                </span>
-                </span>
-            </div>
+            <VariableCard
+                variable={variables[0]}
+                onStartEditing={() => {}}
+                isEditing={false}
+            />
+            <VariableCard
+                variable={variables[1]}
+                onStartEditing={() => {}}
+                isEditing={false}
+            />
+            <VariableCard
+                variable={variables[2]}
+                onStartEditing={() => {}}
+                isEditing={false}
+            />
             </div>
         </>
     )
