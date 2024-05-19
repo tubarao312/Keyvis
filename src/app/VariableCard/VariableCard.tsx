@@ -264,8 +264,9 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
                   })
                 }
               >
-                {FREE_INPUT_VARIABLE_TYPES.map((option) => (
+                {FREE_INPUT_VARIABLE_TYPES.map((option, index) => (
                   <Radio
+                    key={index}
                     value={option}
                     className="group relative flex w-full cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
                   >
