@@ -3,6 +3,7 @@ import React from 'react'
 import {
   Variable,
   VariableCard,
+  VariableTag,
 } from './VariableCard/VariableCard'
 
 
@@ -94,7 +95,7 @@ export default async function Home() {
                     name: tag.name,
                     color: tag.color,
                   }
-                }) as any,
+                }) as VariableTag[],
                 value: {
                   type: {
                     type: VariableTypes.FREE_INPUT,
