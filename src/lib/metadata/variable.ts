@@ -4,7 +4,6 @@ import prisma from '@/lib/prisma';
 /* 
     VARIABLE CRUD OPERATIONS
 */
-
 export async function createVariable({ name, description, value }: Prisma.VariableCreateInput) {
     try {
         return await prisma.variable.create({
