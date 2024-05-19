@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -24,8 +25,8 @@ model Variable {
   updatedAt DateTime @default(now()) @updatedAt
 
   // Relations
-  History History[]
-  Tags    Tag[]
+  history History[]
+  tags    Tag[]
 }
 
 model History {
@@ -41,5 +42,5 @@ model Tag {
   name  String @unique
   color String
 
-  Variables Variable[]
+  variables Variable[]
 }

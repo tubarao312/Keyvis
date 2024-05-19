@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react'
 import { Badge, BadgeColor } from './Badge'
 import {
@@ -421,7 +423,6 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
 
 interface VariableCardProps {
   variable: Variable
-  onStartEditing: (variable: Variable) => void // Only one variable can be edited at once, so we must notify the parent component when editing starts so it can disable editing on other VariableCard components
   isEditing: boolean
 }
 
@@ -434,13 +435,12 @@ interface VariableCardProps {
  */
 const VariableCard: React.FC<VariableCardProps> = ({
   variable,
-  onStartEditing,
   isEditing,
 }) => {
   const [currentVariable, setCurrentVariable] = useState(variable) // This state will be updated when the user edits the variable, both in the backend and in the current component
   const [beingEdited, setBeingEdited] = useState(isEditing) // This state is passed down from the higher component so it can be disabled from above
   const handleToggleEdit = (edit: boolean) => {
-    if (edit) onStartEditing(variable)
+    // if (edit) onStartEditing(variable)
     setBeingEdited(edit)
   }
 

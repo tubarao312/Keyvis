@@ -1,17 +1,21 @@
+"use server";
+
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
+
+import { cache } from 'react'
 
 /* 
     VARIABLE CRUD OPERATIONS
 */
-export async function createVariable({ name, description, value }: Prisma.VariableCreateInput) {
+export const createVariable = async ({ name, description, value }: Prisma.VariableCreateInput) => {
     try {
         return await prisma.variable.create({
             data: {
                 name,
                 description,
                 value,
-                History: {
+                history: {
                     create: {
                         value
                     }
@@ -27,20 +31,26 @@ export async function createVariable({ name, description, value }: Prisma.Variab
     }
 }
 
-export async function getVariable({ id }: Prisma.VariableWhereUniqueInput) {
+export const getVariable = cache(async ({ id }: Prisma.VariableWhereUniqueInput) => {
     return await prisma.variable.findUnique({
         where: { id },
         include: {
-            Tags: true,
+            tags: true,
         }
     });
-}
+});
 
-export async function getVariables() {
-    return await prisma.variable.findMany();
-}
+export const getVariables = cache(async () => {
+    return await prisma.variable.findMany(
+        {
+            include: {
+                tags: true,
+            }
+        }
+    );
+});
 
-export async function updateVariable({ id, description, value }: Prisma.VariableUpdateInput) {
+export const updateVariable = async ({ id, description, value }: Prisma.VariableUpdateInput) => {
     if (!id) {
         throw new Error('ID is required');
     }
@@ -59,7 +69,7 @@ export async function updateVariable({ id, description, value }: Prisma.Variable
         data: {
             description,
             value,
-            History: {
+            history: {
                 create: {
                     value: value as string
                 }
@@ -68,12 +78,11 @@ export async function updateVariable({ id, description, value }: Prisma.Variable
     });
 }
 
-export async function deleteVariable({ id }: Prisma.VariableWhereUniqueInput) {
+export const deleteVariable = async ({ id }: Prisma.VariableWhereUniqueInput) => {
     return await prisma.variable.delete({
         where: { id }
     });
 }
-
 
 /* 
     TAG CRUD OPERATIONS
@@ -82,7 +91,7 @@ function isValidColor(color: string) {
     return !/^#[0-9A-F]{6}$/i.test(color);
 }
 
-export async function createTag({ name, color }: Prisma.TagCreateInput) {
+export const createTag = async ({ name, color }: Prisma.TagCreateInput) => {
     if (!isValidColor(color)) {
         throw new Error('Invalid color format');
     }
@@ -103,7 +112,7 @@ export async function createTag({ name, color }: Prisma.TagCreateInput) {
     }
 }
 
-export async function editTagColor({ id, color }: Prisma.TagUpdateInput) {
+export const editTagColor = async ({ id, color }: Prisma.TagUpdateInput) => {
     if (color && !isValidColor(color as string)) {
         throw new Error('Invalid color format');
     }
@@ -114,17 +123,17 @@ export async function editTagColor({ id, color }: Prisma.TagUpdateInput) {
     });
 }
 
-export async function deleteTag({ id }: Prisma.TagWhereUniqueInput) {
+export const deleteTag = async ({ id }: Prisma.TagWhereUniqueInput) => {
     return await prisma.tag.delete({
         where: { id }
     });
 }
 
-export async function addTagToVariable({ variableId, tagId }: { variableId: string, tagId: string }) {
+export const addTagToVariable = async ({ variableId, tagId }: { variableId: string, tagId: string }) => {
     return await prisma.variable.update({
         where: { id: variableId },
         data: {
-            Tags: {
+            tags: {
                 connect: { id: tagId }
             }
         }
