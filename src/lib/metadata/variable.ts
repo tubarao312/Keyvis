@@ -1,6 +1,6 @@
 "use server";
 
-import { Prisma } from '@prisma/client';
+import { Prisma, Variable } from '@prisma/client';
 import prisma from '@/lib/prisma';
 
 import { cache } from 'react'
@@ -8,13 +8,25 @@ import { cache } from 'react'
 /* 
     VARIABLE CRUD OPERATIONS
 */
-export const createVariable = async ({ name, description, value }: Prisma.VariableCreateInput) => {
+export const createVariable = async ({
+    name,
+    description,
+    value,
+    defaultValue,
+    type,
+    selector
+}: Prisma.VariableCreateInput) => {
+    // Here I have to verify that all the inputs are correct
+
     try {
         return await prisma.variable.create({
             data: {
                 name,
                 description,
                 value,
+                defaultValue,
+                type,
+                selector,
                 history: {
                     create: {
                         value
@@ -31,7 +43,7 @@ export const createVariable = async ({ name, description, value }: Prisma.Variab
     }
 }
 
-export const getVariable = cache(async ({ id }: Prisma.VariableWhereUniqueInput) => {
+export const getVariable = cache(async ({ id }: Prisma.VariableWhereUniqueInput): Promise<Variable | null> => {
     return await prisma.variable.findUnique({
         where: { id },
         include: {
@@ -40,7 +52,7 @@ export const getVariable = cache(async ({ id }: Prisma.VariableWhereUniqueInput)
     });
 });
 
-export const getVariables = cache(async () => {
+export const getVariables = cache(async (): Promise<Variable[]> => {
     return await prisma.variable.findMany(
         {
             include: {

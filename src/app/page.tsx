@@ -87,27 +87,27 @@ export default async function Home() {
       <div className="h-10"/>
           <div className="flex flex-col gap-8">
             {variables.map((variable) => {
-              const v: Variable = {
-                name: variable.name,
-                description: variable.description as string,
-                tags: variable.tags.map((tag) => {
-                  return {
-                    name: tag.name,
-                    color: tag.color,
-                  }
-                }) as VariableTag[],
-                value: {
-                  type: {
-                    type: VariableTypes.FREE_INPUT,
-                    inputType: FreeInputVariableTypes.FLOAT,
-                  },
-                  value: variable.value,
-                },
-              }
+              // const v: Variable = {
+              //   name: variable.name,
+              //   description: variable.description as string,
+              //   tags: variable.tags.map((tag) => {
+              //     return {
+              //       name: tag.name,
+              //       color: tag.color,
+              //     }
+              //   }) as VariableTag[],
+              //   value: {
+              //     type: {
+              //       type: VariableTypes.FREE_INPUT,
+              //       inputType: FreeInputVariableTypes.FLOAT,
+              //     },
+              //     value: variable.value,
+              //   },
+              // }
 
 
               return (
-                <VariableCard variable={v} isEditing={false} key={variable.id} />
+                <VariableCard variable={variable} key={variable.id} />
               )}
             )}
         </div>

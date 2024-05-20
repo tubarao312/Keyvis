@@ -16,6 +16,10 @@ model Variable {
   name  String @unique
   value String
 
+  // Meta
+  type     String // string, number, boolean
+  selector String // input, textarea, select, checkbox
+
   // Optionals
   defaultValue String?
   description  String?
@@ -30,17 +34,22 @@ model Variable {
 }
 
 model History {
-  id         String   @id @default(cuid())
+  id    String @id @default(cuid())
+  value String
+
+  // Time related
+  createdAt DateTime @default(now())
+
+  // Relations
   variableId String
-  value      String
-  createdAt  DateTime @default(now())
   variable   Variable @relation(fields: [variableId], references: [id])
 }
 
 model Tag {
   id    String @id @default(cuid())
   name  String @unique
-  color String
+  color String // hex color || enum
 
+  // Relations (Many to Many)
   variables Variable[]
 }

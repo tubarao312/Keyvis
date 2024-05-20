@@ -17,6 +17,8 @@ import {
 import { Radio, RadioGroup } from '@headlessui/react'
 import ButtonPatternBackground from './ButtonPatternBackground'
 
+import { Variable } from '@prisma/client';
+
 /**
  * Contains the name and color of a tag for a variable
  */
@@ -60,12 +62,12 @@ interface VariableValue {
  * Contains all the information about a variable, its value,
  * and its metadata (name, description, tags, etc.)
  */
-interface Variable {
-  name: string
-  description: string
-  tags: VariableTag[]
-  value: VariableValue
-}
+// interface Variable {
+//   name: string
+//   description: string
+//   tags: VariableTag[]
+//   value: VariableValue
+// }
 
 // Content ________________________________________________________
 
@@ -118,20 +120,17 @@ const FREE_INPUT_VARIABLE_TYPES = [
 interface VariableContentProps {
   variable: Variable
   toggleEdit: () => void
-  setVariable: (variable: Variable) => void
 }
 
 /**
  * A form that allows the user to edit a variable's metadata (name & description).
  * @param variable The variable to edit.
  * @param toggleEdit A callback that is called when the user is done editing.
- * @param setVariable A callback that is called when the user is done editing and the variable should be updated.
  * @returns The EditVariableContent component.
  */
 const EditVariableContent: React.FC<VariableContentProps> = ({
   variable,
   toggleEdit,
-  setVariable,
 }) => {
   /**
    * This state is always updated to reflect the current state of the variable
@@ -142,7 +141,6 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
 
   const handleSave = () => {
     // @TODO - Insert API call to save the variable server-side
-    setVariable(newVariable)
     toggleEdit()
   }
 
@@ -208,24 +206,24 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
             onChange={(e) =>
               setNewVariable({ ...newVariable, description: e.target.value })
             }
-            value={newVariable.description}
+            value={newVariable.description?? ""}
           />
         </div>
 
         {/* Divider */}
         <div className="h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
 
-        {/* Variable Type */}
+        {/* Variable Selector */}
         <div className="flex flex-col gap-2">
           <h2 className=" text-base font-semibold">Type</h2>
           {/* TODO - Add radio group here */}
           <RadioGroup
             className="flex flex-col gap-4 lg:grid lg:grid-cols-2"
-            value={newVariable.value.type.type}
+            value={newVariable.selector}
             onChange={(value) =>
               setNewVariable({
                 ...newVariable,
-                value: { ...newVariable.value, type: { type: value } },
+                selector: value,
               })
             }
           >
@@ -249,20 +247,21 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
             ))}
           </RadioGroup>
         </div>
+
+        {/* Change the value depending on the type of variable that it is */}
         <div className="flex flex-col gap-2">
-          {newVariable.value.type.type === VariableTypes.FREE_INPUT && (
+
+          {/* Only free input type is currently supported  */}
+          {newVariable.selector === VariableTypes.FREE_INPUT && (
             <>
               <h2 className="text-base font-semibold">Free Input</h2>
               <RadioGroup
                 className="flex flex-row gap-4"
-                value={newVariable.value.type.inputType}
+                value={newVariable.value}
                 onChange={(value) =>
                   setNewVariable({
                     ...newVariable,
-                    value: {
-                      ...newVariable.value,
-                      type: { ...newVariable.value.type, inputType: value },
-                    },
+                    value: value,
                   })
                 }
               >
@@ -287,7 +286,9 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
               </RadioGroup>
             </>
           )}
-          {newVariable.value.type.type === VariableTypes.DROPDOWN && (
+          
+          {/* Ignore Dropdown type for now */}
+          {/* {newVariable.selector === VariableTypes.DROPDOWN && (
             <>
               <h2 className="text-base font-semibold">Dropdown</h2>
               <div className="flex flex-col gap-2" id="variableTypeDropdown">
@@ -368,7 +369,8 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
                 </button>
               </div>
             </>
-          )}
+          )} */}
+
           {/* TODO - Add radio group here */}
         </div>
       </div>
@@ -381,20 +383,18 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
  * It can edit the tags and value within the card, but not the metadata (name and description)
  * @param variable The variable to view.
  * @param toggleEdit A callback that is called when the user starts editing the variable.
- * @param setVariable A callback that is called when the user is done editing and the variable should be updated.
  * @returns The ViewVariableContent component.
  */
 const ViewVariableContent: React.FC<VariableContentProps> = ({
   variable,
   toggleEdit,
-  setVariable,
 }) => {
   return (
     <>
       <span className="flex flex-row items-center gap-2">
         <h2 className="text-lg font-semibold">{variable.name}:</h2>
         <h2 className="font-mono text-lg font-semibold text-emerald-600 dark:text-emerald-400">
-          {variable.value.value}
+          {variable.value}
         </h2>
         <PencilIcon className="h-4 w-4 cursor-pointer text-zinc-600 transition-all duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white" />
       </span>
@@ -403,9 +403,13 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
       </p>
       <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
       <span className="mt-3 flex flex-row gap-1.5">
-        {variable.tags.map((tag) => (
+
+        {/* Ignore Tags for now */}
+        {/* {variable.tags.map((tag) => (
           <Badge key={tag.name} color={tag.color} text={tag.name} />
-        ))}
+        ))} */}
+
+
         <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
         <span className="my-auto ml-auto flex flex-row gap-0.5">
           <TrashIcon className="h-9 w-9 cursor-pointer rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400 dark:hover:text-white" />
@@ -423,7 +427,6 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
 
 interface VariableCardProps {
   variable: Variable
-  isEditing: boolean
 }
 
 /**
@@ -435,10 +438,8 @@ interface VariableCardProps {
  */
 const VariableCard: React.FC<VariableCardProps> = ({
   variable,
-  isEditing,
 }) => {
-  const [currentVariable, setCurrentVariable] = useState(variable) // This state will be updated when the user edits the variable, both in the backend and in the current component
-  const [beingEdited, setBeingEdited] = useState(isEditing) // This state is passed down from the higher component so it can be disabled from above
+  const [beingEdited, setBeingEdited] = useState(false) // This state is passed down from the higher component so it can be disabled from above
   const handleToggleEdit = (edit: boolean) => {
     // if (edit) onStartEditing(variable)
     setBeingEdited(edit)
@@ -454,15 +455,13 @@ const VariableCard: React.FC<VariableCardProps> = ({
     >
       {beingEdited ? (
         <EditVariableContent
-          variable={currentVariable}
+          variable={variable}
           toggleEdit={() => handleToggleEdit(false)}
-          setVariable={setCurrentVariable}
         />
       ) : (
         <ViewVariableContent
-          variable={currentVariable}
+          variable={variable}
           toggleEdit={() => handleToggleEdit(true)}
-          setVariable={setCurrentVariable}
         />
       )}
     </div>
