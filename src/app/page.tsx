@@ -4,11 +4,10 @@ import {
   VariableCard,
 } from './VariableCard/VariableCard'
 
-import { BadgeColor } from './VariableCard/Badge'
 import { getVariables } from '@/lib/metadata/variable'
 
 export default async function Home() {
-  const variables = await getVariables()  
+  const variables = await getVariables()
 
   return (
     <>

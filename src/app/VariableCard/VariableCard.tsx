@@ -19,7 +19,7 @@ import ButtonPatternBackground from './ButtonPatternBackground'
 
 import { Variable } from '@prisma/client';
 import { Selectors, Types } from '@/lib/metadata/types';
-import { deleteVariable } from '@/lib/metadata/variable';
+import { deleteVariable, updateVariable } from '@/lib/metadata/variable';
 
 /**
  * Contains the name and color of a tag for a variable
@@ -118,6 +118,25 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
   const handleSave = async () => {
     // @TODO - Insert API call to save the variable server-side
 
+    // Create object with the different parameters from the newVariable state 
+    const updatedVariable = {
+      id: newVariable.id,
+      name: newVariable.name,
+      description: newVariable.description,
+      value: newVariable.value === variable.value ? undefined : newVariable.value,
+      type: newVariable.type,
+      selector: newVariable.selector,
+    }
+
+    try {
+      // Save the variable
+      await updateVariable(updatedVariable)
+    } catch (error) {
+
+      // For now just log into the console
+      console.error('Error saving variable:', error)
+    }
+
     toggleEdit()
   }
 
@@ -132,13 +151,13 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
           <h1 className="mr-auto text-xl font-semibold">Edit Variable</h1>
           <button
             className="flex h-full flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-zinc-600 ring-1 ring-inset transition-all duration-150 ease-in-out hover:text-black hover:ring-white/20 data-[checked]:ring-2 dark:text-zinc-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:text-white dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
-            onClick={() => handleCancel()}
+            onClick={handleCancel}
           >
             Cancel
           </button>
           <button
             className="ml-2 flex h-full flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-emerald-600 ring-1 ring-inset transition-all duration-150 ease-in-out  hover:ring-emerald-600/20  dark:bg-emerald-600/10 dark:text-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-emerald-600/20 dark:hover:ring-emerald-600/50"
-            onClick={() => handleSave()}
+            onClick={handleSave}
           >
             Save
             <CheckIcon className="ml-1 h-4 w-4 text-emerald-600 dark:text-emerald-400" />

@@ -62,32 +62,22 @@ export const getVariables = unstable_cache(async (): Promise<Variable[]> => {
     );
 }, ['variables'], { tags: ['variable'] });
 
-export const updateVariable = async ({ id, description, value, type, selector }: Prisma.VariableUpdateInput) => {
+export const updateVariable = async ({ id, name, description, value, type, selector }: Prisma.VariableUpdateInput) => {
     if (!id) {
         throw new Error('ID is required');
     }
 
     // If no value is present then just update variable
-    if (!value) {
-        await prisma.variable.update({
-            where: { id: id as string },
-            data: { description, type, selector }
-        });
-    }
-    else {
-        // Else also add the value to the history
-        await prisma.variable.update({
-            where: { id: id as string },
+    await prisma.variable.update({
+        where: { id: id as string },
+        data: { name, description, type, selector }
+    });
+
+    if (value) {
+        await prisma.history.create({
             data: {
-                description,
-                value,
-                type,
-                selector,
-                history: {
-                    create: {
-                        value: value as string
-                    }
-                }
+                value: value as string,
+                variableId: id as string
             }
         });
     }
