@@ -4,6 +4,7 @@ services:
       context: .
       target: development  # Use the 'development' stage from Dockerfile.prod for development
     command: npm run dev
+    user: 1000:1000  # Use the same user as the host
     env_file:
       - .env
     ports:
