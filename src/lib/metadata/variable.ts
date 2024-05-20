@@ -3,7 +3,7 @@
 import { Prisma, Variable } from '@prisma/client';
 import prisma from '@/lib/prisma';
 
-import { cache } from 'react'
+import { revalidateTag, unstable_cache } from 'next/cache';
 
 /* 
     VARIABLE CRUD OPERATIONS
@@ -43,16 +43,16 @@ export const createVariable = async ({
     }
 }
 
-export const getVariable = cache(async ({ id }: Prisma.VariableWhereUniqueInput): Promise<Variable | null> => {
+export const getVariable = unstable_cache(async ({ id }: Prisma.VariableWhereUniqueInput): Promise<Variable | null> => {
     return await prisma.variable.findUnique({
         where: { id },
         include: {
             tags: true,
         }
     });
-});
+}, ['variable'], { tags: ['variable'] });
 
-export const getVariables = cache(async (): Promise<Variable[]> => {
+export const getVariables = unstable_cache(async (): Promise<Variable[]> => {
     return await prisma.variable.findMany(
         {
             include: {
@@ -60,7 +60,7 @@ export const getVariables = cache(async (): Promise<Variable[]> => {
             }
         }
     );
-});
+}, ['variables'], { tags: ['variable'] });
 
 export const updateVariable = async ({ id, description, value, type, selector }: Prisma.VariableUpdateInput) => {
     if (!id) {
@@ -69,33 +69,38 @@ export const updateVariable = async ({ id, description, value, type, selector }:
 
     // If no value is present then just update variable
     if (!value) {
-        return await prisma.variable.update({
+        await prisma.variable.update({
             where: { id: id as string },
             data: { description, type, selector }
         });
     }
-
-    // Else also add the value to the history
-    return await prisma.variable.update({
-        where: { id: id as string },
-        data: {
-            description,
-            value,
-            type,
-            selector,
-            history: {
-                create: {
-                    value: value as string
+    else {
+        // Else also add the value to the history
+        await prisma.variable.update({
+            where: { id: id as string },
+            data: {
+                description,
+                value,
+                type,
+                selector,
+                history: {
+                    create: {
+                        value: value as string
+                    }
                 }
             }
-        }
-    });
+        });
+    }
+
+    revalidateTag('variable');
 }
 
 export const deleteVariable = async ({ id }: Prisma.VariableWhereUniqueInput) => {
-    return await prisma.variable.delete({
+    await prisma.variable.delete({
         where: { id }
     });
+
+    revalidateTag('variable');
 }
 
 /* 

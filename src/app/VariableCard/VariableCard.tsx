@@ -19,6 +19,7 @@ import ButtonPatternBackground from './ButtonPatternBackground'
 
 import { Variable } from '@prisma/client';
 import { Selectors, Types } from '@/lib/metadata/types';
+import { deleteVariable } from '@/lib/metadata/variable';
 
 /**
  * Contains the name and color of a tag for a variable
@@ -44,27 +45,16 @@ interface VariableValue {
   type: VariableType
 }
 
-/**
- * Contains all the information about a variable, its value,
- * and its metadata (name, description, tags, etc.)
- */
-// interface Variable {
-//   name: string
-//   description: string
-//   tags: VariableTag[]
-//   value: VariableValue
-// }
-
 // Content ________________________________________________________
 
-interface VariableTypeRadioOption {
+interface VariableSelectorRadioOption {
   name: string
   description: string
   key: Selectors
   value: Selectors
 }
 
-const VARIABLE_TYPE_GROUP_OPTIONS: VariableTypeRadioOption[] = [
+const VARIABLE_SELECTOR_OPTIONS: VariableSelectorRadioOption[] = [
   {
     name: 'Free Input',
     description: 'Free input for the variable value.',
@@ -85,7 +75,7 @@ const VARIABLE_TYPE_GROUP_OPTIONS: VariableTypeRadioOption[] = [
   },
 ]
 
-const FREE_INPUT_VARIABLE_TYPES = [
+const VARIABLE_TYPES = [
   {
     name: 'String',
     description: 'A string value.',
@@ -125,8 +115,9 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
    */
   const [newVariable, setNewVariable] = useState(variable)
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // @TODO - Insert API call to save the variable server-side
+
     toggleEdit()
   }
 
@@ -213,7 +204,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
               })
             }
           >
-            {VARIABLE_TYPE_GROUP_OPTIONS.map((option) => (
+            {VARIABLE_SELECTOR_OPTIONS.map((option) => (
               <Radio
                 value={option.value}
                 key={option.key}
@@ -251,7 +242,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
                   })
                 }
               >
-                {FREE_INPUT_VARIABLE_TYPES.map((option, index) => (
+                {VARIABLE_TYPES.map((option, index) => (
                   <Radio
                     key={index}
                     value={option}
@@ -398,7 +389,14 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
 
         <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
         <span className="my-auto ml-auto flex flex-row gap-0.5">
-          <TrashIcon className="h-9 w-9 cursor-pointer rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400 dark:hover:text-white" />
+
+        <form action={async () => {
+          await deleteVariable({ id: variable.id })
+        }}>
+          <button>
+            <TrashIcon className="h-9 w-9 cursor-pointer rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400 dark:hover:text-white" />
+          </button>
+        </form>
           <Cog6ToothIcon
             className="h-9 w-9 cursor-pointer rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400 dark:hover:text-white"
             onClick={() => toggleEdit()}
