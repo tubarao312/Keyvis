@@ -5,7 +5,7 @@
  * Learn more about the Seed Client by following our guide: https://docs.snaplet.dev/seed/getting-started
 */
 import { createSeedClient } from "@snaplet/seed";
-import { Selectors, Types } from '@/lib/metadata/constants';
+import { Selectors, Types } from '@/lib/metadata/types';
 import { copycat } from "@snaplet/copycat";
 
 const main = async () => {

@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-import { BadgeColor } from '@/lib/metadata/constants'
+import { BadgeColor } from '@/lib/metadata/types'
 
 const COLOR_CLASS_MAP: Record<BadgeColor, string> = {
   [BadgeColor.RED]:

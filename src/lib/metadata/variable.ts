@@ -62,7 +62,7 @@ export const getVariables = cache(async (): Promise<Variable[]> => {
     );
 });
 
-export const updateVariable = async ({ id, description, value }: Prisma.VariableUpdateInput) => {
+export const updateVariable = async ({ id, description, value, type, selector }: Prisma.VariableUpdateInput) => {
     if (!id) {
         throw new Error('ID is required');
     }
@@ -71,7 +71,7 @@ export const updateVariable = async ({ id, description, value }: Prisma.Variable
     if (!value) {
         return await prisma.variable.update({
             where: { id: id as string },
-            data: { description }
+            data: { description, type, selector }
         });
     }
 
@@ -81,6 +81,8 @@ export const updateVariable = async ({ id, description, value }: Prisma.Variable
         data: {
             description,
             value,
+            type,
+            selector,
             history: {
                 create: {
                     value: value as string

@@ -18,6 +18,7 @@ import { Radio, RadioGroup } from '@headlessui/react'
 import ButtonPatternBackground from './ButtonPatternBackground'
 
 import { Variable } from '@prisma/client';
+import { Selectors, Types } from '@/lib/metadata/types';
 
 /**
  * Contains the name and color of a tag for a variable
@@ -27,25 +28,10 @@ interface VariableTag {
   color: BadgeColor
 }
 
-/**
- * The type of a variable.
- */
-enum FreeInputVariableTypes {
-  STRING = 'String',
-  INTEGER = 'Integer',
-  FLOAT = 'Float',
-}
-
-enum VariableTypes {
-  DROPDOWN = 'Dropdown',
-  FREE_INPUT = 'FreeInput',
-  TOGGLE = 'Toggle',
-}
-
 interface VariableType {
-  type: VariableTypes
+  type: Selectors
+  inputType?: Types
   options?: string[]
-  inputType?: FreeInputVariableTypes
 }
 
 /**
@@ -74,28 +60,28 @@ interface VariableValue {
 interface VariableTypeRadioOption {
   name: string
   description: string
-  key: VariableTypes
-  value: VariableTypes
+  key: Selectors
+  value: Selectors
 }
 
 const VARIABLE_TYPE_GROUP_OPTIONS: VariableTypeRadioOption[] = [
   {
     name: 'Free Input',
     description: 'Free input for the variable value.',
-    key: VariableTypes.FREE_INPUT,
-    value: VariableTypes.FREE_INPUT,
+    key: Selectors.FREE_INPUT,
+    value: Selectors.FREE_INPUT,
   },
   {
     name: 'Dropdown',
     description: 'Select from a list of predefined values.',
-    key: VariableTypes.DROPDOWN,
-    value: VariableTypes.DROPDOWN,
+    key: Selectors.DROPDOWN,
+    value: Selectors.DROPDOWN,
   },
   {
     name: 'Toggle',
     description: 'True or False value.',
-    key: VariableTypes.TOGGLE,
-    value: VariableTypes.TOGGLE,
+    key: Selectors.TOGGLE,
+    value: Selectors.TOGGLE,
   },
 ]
 
@@ -103,17 +89,17 @@ const FREE_INPUT_VARIABLE_TYPES = [
   {
     name: 'String',
     description: 'A string value.',
-    value: FreeInputVariableTypes.STRING,
+    value: Types.STRING,
   },
   {
     name: 'Integer',
     description: 'An integer value.',
-    value: FreeInputVariableTypes.INTEGER,
+    value: Types.INTEGER,
   },
   {
     name: 'Float',
     description: 'A floating-point value.',
-    value: FreeInputVariableTypes.FLOAT,
+    value: Types.FLOAT,
   },
 ]
 
@@ -252,7 +238,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
         <div className="flex flex-col gap-2">
 
           {/* Only free input type is currently supported  */}
-          {newVariable.selector === VariableTypes.FREE_INPUT && (
+          {newVariable.selector === Selectors.FREE_INPUT && (
             <>
               <h2 className="text-base font-semibold">Free Input</h2>
               <RadioGroup
@@ -288,7 +274,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
           )}
           
           {/* Ignore Dropdown type for now */}
-          {/* {newVariable.selector === VariableTypes.DROPDOWN && (
+          {/* {newVariable.selector === Selectors.DROPDOWN && (
             <>
               <h2 className="text-base font-semibold">Dropdown</h2>
               <div className="flex flex-col gap-2" id="variableTypeDropdown">
@@ -473,7 +459,7 @@ export {
   type VariableValue,
   type VariableTag,
   type VariableType,
-  FreeInputVariableTypes,
-  VariableTypes,
+  Types,
+  Selectors,
   VariableCard,
 }
