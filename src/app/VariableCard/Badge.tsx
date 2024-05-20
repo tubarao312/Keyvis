@@ -1,13 +1,6 @@
 import clsx from 'clsx'
 
-enum BadgeColor {
-  RED = 'Red',
-  GREEN = 'Green',
-  BLUE = 'Blue',
-  ORANGE = 'Orange',
-  YELLOW = 'Yellow',
-  PURPLE = 'Purple',
-}
+import { BadgeColor } from '@/lib/metadata/constants'
 
 const COLOR_CLASS_MAP: Record<BadgeColor, string> = {
   [BadgeColor.RED]:
