@@ -18,7 +18,24 @@ const main = async () => {
   await seed.variable((x) =>
     x(5, {
       selector: Selectors.FREE_INPUT,
+
       type: (ctx) => copycat.oneOf(ctx.seed, [Types.INTEGER, Types.STRING, Types.FLOAT]),
+
+      // Value must correspond to the type
+      value: (ctx) => {
+        switch (ctx.data.type) {
+          case Types.INTEGER:
+            return copycat.int(ctx.seed, { min: 0, max: 100 }).toString();
+          case Types.STRING:
+            return copycat.word(ctx.seed).toString();
+          case Types.FLOAT:
+            return copycat.float(ctx.seed, { min: 0, max: 100 }).toString();
+
+          // It should never reach this stage
+          default:
+            return "Invalid type";
+        }
+      }
     })
   )
 
