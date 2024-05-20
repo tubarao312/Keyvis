@@ -17,6 +17,8 @@ const main = async () => {
   // Seed the database with 10 variable
   await seed.variable((x) =>
     x(5, {
+      name: (ctx) => copycat.word(ctx.seed),
+
       selector: Selectors.FREE_INPUT,
 
       type: (ctx) => copycat.oneOf(ctx.seed, [Types.INTEGER, Types.STRING, Types.FLOAT]),
