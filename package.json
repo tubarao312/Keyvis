@@ -2,11 +2,17 @@
   "name": "tailwindui-protocol",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "npx tsx prisma/seed/seed.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "postmigrate": "npx @snaplet/seed sync"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
@@ -51,11 +57,17 @@
     "zustand": "^4.3.2"
   },
   "devDependencies": {
+    "@snaplet/copycat": "^5.0.0",
+    "@snaplet/seed": "^0.97.17",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.0.4",
     "prettier": "^3.1.1",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "prisma": "^5.14.0",
-    "sharp": "0.33.1"
+    "sharp": "0.33.1",
+    "tsx": "^4.10.5"
+  },
+  "@snaplet/seed": {
+    "config": "prisma/seed/seed.config.ts"
   }
 }
