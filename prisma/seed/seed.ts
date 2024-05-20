@@ -6,6 +6,7 @@
 */
 import { createSeedClient } from "@snaplet/seed";
 import { Selectors, Types } from '@/lib/metadata/constants';
+import { copycat } from "@snaplet/copycat";
 
 const main = async () => {
   const seed = await createSeedClient();
@@ -17,7 +18,7 @@ const main = async () => {
   await seed.variable((x) =>
     x(5, {
       selector: Selectors.FREE_INPUT,
-      type: Types.STRING,
+      type: (ctx) => copycat.oneOf(ctx.seed, [Types.INTEGER, Types.STRING, Types.FLOAT]),
     })
   )
 
