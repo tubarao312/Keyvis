@@ -10,6 +10,14 @@ import { Types } from './types';
 /* 
     VARIABLE CRUD OPERATIONS
 */
+
+/**
+ * Validate the type of the variable based on the value and type combination
+ * @param value - the value of the variable
+ * @param type - the type of the variable
+ * 
+ * @return - a boolean value indicating if the variable type is valid
+ */
 function validateVariableType(value: string, type: string) {
     // Type can only be present in enumerate
     if (type && !Object.values(Types).includes(type as Types)) {
@@ -26,6 +34,18 @@ function validateVariableType(value: string, type: string) {
     }
 }
 
+/**
+ * Create a new variable and saves it in redis
+ * 
+ * @param name - the name of the variable
+ * @param description - the description of the variable
+ * @param value - the value of the variable
+ * @param defaultValue - the default value of the variable
+ * @param type - the type of the variable
+ * @param selector - the selector of the variable
+ * 
+ * @return - the created variable object
+ */
 export const createVariable = async ({
     name,
     description,
@@ -71,6 +91,12 @@ export const createVariable = async ({
     }
 }
 
+/**
+ * Get a variable by its ID and caches it using the specified tag+id combination
+ * @param id - the ID of the variable
+ * 
+ * @return - the variable object
+ */
 export const getVariable = unstable_cache(async ({ id }: Prisma.VariableWhereUniqueInput): Promise<Variable | null> => {
     return await prisma.variable.findUnique({
         where: { id },
@@ -80,6 +106,11 @@ export const getVariable = unstable_cache(async ({ id }: Prisma.VariableWhereUni
     });
 }, ['variable'], { tags: ['variable'] });
 
+/**
+ * Get all variables and cache them using the specified tag
+ * 
+ * @return - an array of variable objects
+ */
 export const getVariables = unstable_cache(async (): Promise<Variable[]> => {
     return await prisma.variable.findMany(
         {
@@ -90,11 +121,24 @@ export const getVariables = unstable_cache(async (): Promise<Variable[]> => {
     );
 }, ['variables'], { tags: ['variable'] });
 
+/**
+ * Update the variable with the specified ID and update the value in redis
+ * 
+ * @param id - the ID of the variable
+ * @param name - the name of the variable
+ * @param description - the description of the variable
+ * @param value - the value of the variable
+ * @param type - the type of the variable
+ * @param selector - the selector of the variable
+ * 
+ * @return - the updated variable object
+ */
 export const updateVariable = async ({ id, name, description, value, type, selector }: Prisma.VariableUpdateInput) => {
     if (!id) {
         throw new Error('ID is required');
     }
 
+    // Validate if the variable type and value are correct 
     if (!validateVariableType(value as string, type as Types)) {
         throw new Error('Invalid value for variable type');
     }
@@ -105,6 +149,7 @@ export const updateVariable = async ({ id, name, description, value, type, selec
         data: { name, description, type, selector }
     });
 
+    // Else create a new history entry and update it in redis
     if (value) {
         await prisma.history.create({
             data: {
@@ -113,7 +158,7 @@ export const updateVariable = async ({ id, name, description, value, type, selec
             }
         });
 
-        // Write redis
+        // Update the variable in redis as well
         writeConfigs(name as string, value as string, type as string);
     }
 
@@ -122,6 +167,11 @@ export const updateVariable = async ({ id, name, description, value, type, selec
     return res;
 }
 
+/**
+ * Delete the variable with the specified ID
+ * 
+ * @param id - the ID of the variable
+ */
 export const deleteVariable = async ({ id }: Prisma.VariableWhereUniqueInput) => {
     await prisma.variable.delete({
         where: { id }
@@ -133,6 +183,13 @@ export const deleteVariable = async ({ id }: Prisma.VariableWhereUniqueInput) =>
 /* 
     TAG CRUD OPERATIONS
 */
+
+/**
+ * Check if the color is in hexadecimal format
+ * @param color - a string representing the color in hexadecimal format
+ * 
+ * @return - a boolean value indicating if the color is valid
+ */
 function isValidColor(color: string) {
     return !/^#[0-9A-F]{6}$/i.test(color);
 }
