@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 
 import { revalidateTag, unstable_cache } from 'next/cache';
 import { writeConfigs } from '@/lib/redis/writeConfigs';
-import { Types } from './types';
+import { Types, BadgeColor } from './types';
 
 /* 
     VARIABLE CRUD OPERATIONS
@@ -185,13 +185,13 @@ export const deleteVariable = async ({ id }: Prisma.VariableWhereUniqueInput) =>
 */
 
 /**
- * Check if the color is in hexadecimal format
+ * Check if the color is in hexadecimal format or in the corresponding enum
  * @param color - a string representing the color in hexadecimal format
  * 
  * @return - a boolean value indicating if the color is valid
  */
 function isValidColor(color: string) {
-    return !/^#[0-9A-F]{6}$/i.test(color);
+    return !/^#[0-9A-F]{6}$/i.test(color) || Object.values(BadgeColor).includes(color as BadgeColor);
 }
 
 export const createTag = async ({ name, color }: Prisma.TagCreateInput) => {
