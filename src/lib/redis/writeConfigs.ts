@@ -1,13 +1,18 @@
 import redis from "@/lib/redis"
 
-// There needs to be a functionality to have default values for the configurations 
+import { Types } from "@/lib/metadata/types"
 
-// There needs to be an API to add new configurations, this can maybe be shared with the writeConfigs???
-
-export function writeConfigs<T>(key: string, value: T) {
-    // 1. Write into redis the configuration 
-
-    // 2. Save the new value into a json file to keep history of the changes
-
-    // 3. Return the new value
+export function writeConfigs(key: string, value: string, type: string) {
+    // Convert value to correct type before writing to redis
+    switch (type) {
+        case Types.INTEGER:
+            redis.set(key, parseInt(value))
+            break
+        case Types.FLOAT:
+            redis.set(key, parseFloat(value))
+            break
+        default:
+            // Write to redis
+            redis.set(key, value)
+    }
 }

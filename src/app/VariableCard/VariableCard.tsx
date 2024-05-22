@@ -29,22 +29,6 @@ interface VariableTag {
   color: BadgeColor
 }
 
-interface VariableType {
-  type: Selectors
-  inputType?: Types
-  options?: string[]
-}
-
-/**
- * Contains the value and type of a variable.
- * The value can be a string, number, or boolean.
- * The type can be a dropdown, free input, or toggle.
- */
-interface VariableValue {
-  value: string | number | boolean
-  type: VariableType
-}
-
 // Content ________________________________________________________
 
 interface VariableSelectorRadioOption {
@@ -473,9 +457,7 @@ const VariableCard: React.FC<VariableCardProps> = ({
 
 export {
   type Variable,
-  type VariableValue,
   type VariableTag,
-  type VariableType,
   Types,
   Selectors,
   VariableCard,

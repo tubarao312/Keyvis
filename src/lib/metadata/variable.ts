@@ -4,6 +4,7 @@ import { Prisma, Variable } from '@prisma/client';
 import prisma from '@/lib/prisma';
 
 import { revalidateTag, unstable_cache } from 'next/cache';
+import { writeConfigs } from '@/lib/redis/writeConfigs';
 
 /* 
     VARIABLE CRUD OPERATIONS
@@ -19,7 +20,7 @@ export const createVariable = async ({
     // Here I have to verify that all the inputs are correct
 
     try {
-        return await prisma.variable.create({
+        const res = await prisma.variable.create({
             data: {
                 name,
                 description,
@@ -34,6 +35,14 @@ export const createVariable = async ({
                 }
             }
         });
+
+        // Revalidate the cache
+        revalidateTag('variable');
+
+        // Write redis
+        writeConfigs(name, value, type);
+
+        return res;
     } catch (err) {
         if (err instanceof Prisma.PrismaClientKnownRequestError) {
             if (err.code === 'P2002') {
@@ -68,7 +77,7 @@ export const updateVariable = async ({ id, name, description, value, type, selec
     }
 
     // If no value is present then just update variable
-    await prisma.variable.update({
+    const res = await prisma.variable.update({
         where: { id: id as string },
         data: { name, description, type, selector }
     });
@@ -80,9 +89,14 @@ export const updateVariable = async ({ id, name, description, value, type, selec
                 variableId: id as string
             }
         });
+
+        // Write redis
+        writeConfigs(name as string, value as string, type as string);
     }
 
     revalidateTag('variable');
+
+    return res;
 }
 
 export const deleteVariable = async ({ id }: Prisma.VariableWhereUniqueInput) => {

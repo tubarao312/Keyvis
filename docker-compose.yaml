@@ -7,9 +7,21 @@ services:
     user: 1000:1000  # Use the same user as the host
     env_file:
       - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=secret
+      - NODE_ENV=development
     ports:
       - 3000:3000
     volumes:
       - .:/app:rw
+    
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_PASSWORD=secret
 
   
