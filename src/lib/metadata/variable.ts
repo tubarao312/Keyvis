@@ -5,10 +5,27 @@ import prisma from '@/lib/prisma';
 
 import { revalidateTag, unstable_cache } from 'next/cache';
 import { writeConfigs } from '@/lib/redis/writeConfigs';
+import { Types } from './types';
 
 /* 
     VARIABLE CRUD OPERATIONS
 */
+function validateVariableType(value: string, type: string) {
+    // Type can only be present in enumerate
+    if (type && !Object.values(Types).includes(type as Types)) {
+        throw new Error('Invalid variable type');
+    }
+
+    switch (type) {
+        case Types.INTEGER:
+            return !isNaN(parseInt(value));
+        case Types.FLOAT:
+            return !isNaN(parseFloat(value));
+        default:
+            return true;
+    }
+}
+
 export const createVariable = async ({
     name,
     description,
@@ -17,7 +34,9 @@ export const createVariable = async ({
     type,
     selector
 }: Prisma.VariableCreateInput) => {
-    // Here I have to verify that all the inputs are correct
+    if (!validateVariableType(value as string, type as Types)) {
+        throw new Error('Invalid value for variable type');
+    }
 
     try {
         const res = await prisma.variable.create({
@@ -74,6 +93,10 @@ export const getVariables = unstable_cache(async (): Promise<Variable[]> => {
 export const updateVariable = async ({ id, name, description, value, type, selector }: Prisma.VariableUpdateInput) => {
     if (!id) {
         throw new Error('ID is required');
+    }
+
+    if (!validateVariableType(value as string, type as Types)) {
+        throw new Error('Invalid value for variable type');
     }
 
     // If no value is present then just update variable

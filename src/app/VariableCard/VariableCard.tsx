@@ -195,7 +195,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
 
         {/* Variable Selector */}
         <div className="flex flex-col gap-2">
-          <h2 className=" text-base font-semibold">Type</h2>
+          <h2 className=" text-base font-semibold">Selector</h2>
           {/* TODO - Add radio group here */}
           <RadioGroup
             className="flex flex-col gap-4 lg:grid lg:grid-cols-2"
@@ -234,21 +234,20 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
           {/* Only free input type is currently supported  */}
           {newVariable.selector === Selectors.FREE_INPUT && (
             <>
-              <h2 className="text-base font-semibold">Free Input</h2>
+              <h2 className="text-base font-semibold">Type</h2>
               <RadioGroup
                 className="flex flex-row gap-4"
-                value={newVariable.value}
-                onChange={(value) =>
-                  setNewVariable({
-                    ...newVariable,
-                    value: value,
-                  })
-                }
+                value={newVariable.type}
+                onChange={(value) => 
+                    setNewVariable({
+                      ...newVariable,
+                      type: value,
+                    })}
               >
                 {VARIABLE_TYPES.map((option, index) => (
                   <Radio
                     key={index}
-                    value={option}
+                    value={option.value}
                     className="group relative flex w-full cursor-pointer flex-row items-center gap-1 overflow-hidden rounded-md p-4 ring-1 ring-inset transition-all duration-75 ease-in-out hover:ring-white/20 data-[checked]:ring-2 data-[checked]:ring-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
                   >
                     <div className="flex w-full flex-col gap-0.5">
