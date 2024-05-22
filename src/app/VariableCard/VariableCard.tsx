@@ -100,9 +100,9 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
   const [newVariable, setNewVariable] = useState(variable)
 
   const handleSave = async () => {
-    // @TODO - Insert API call to save the variable server-side
-
     // Create object with the different parameters from the newVariable state 
+    
+    //@TODO Replace this mess with zod validation and useForm
     const updatedVariable = {
       id: newVariable.id,
       name: newVariable.name,
