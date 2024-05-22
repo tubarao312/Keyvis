@@ -8,6 +8,10 @@ import { createSeedClient } from "@snaplet/seed";
 import { Selectors, Types } from '@/lib/metadata/types';
 import { copycat } from "@snaplet/copycat";
 
+import { PrismaClient } from "@prisma/client";
+
+const client = new PrismaClient();
+
 const main = async () => {
   const seed = await createSeedClient();
 
@@ -17,6 +21,7 @@ const main = async () => {
   // Seed the database with 10 variable
   await seed.variable((x) =>
     x(5, {
+      id: (ctx) => copycat.uuid(ctx.seed),
       name: (ctx) => copycat.word(ctx.seed),
 
       selector: Selectors.FREE_INPUT,
