@@ -5,13 +5,13 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["yarn", "run", "dev"]
 
 # Builder Stage
 FROM node:18-alpine AS builder
@@ -20,11 +20,11 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN yarn run build
 
 # Production Stage 
 

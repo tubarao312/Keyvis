@@ -2,9 +2,9 @@ services:
   client:
     build:
       context: .
-      target: development  # Use the 'development' stage from Dockerfile.prod for development
-    command: npm run dev
-    user: 1000:1000  # Use the same user as the host
+      target: development # Use the 'development' stage from Dockerfile.prod for development
+    command: yarn run dev
+    user: 1000:1000 # Use the same user as the host
     env_file:
       - .env
     environment:
@@ -16,12 +16,10 @@ services:
       - 3000:3000
     volumes:
       - .:/app:rw
-    
+
   redis:
     image: redis:alpine
     ports:
       - 6379:6379
     environment:
       - REDIS_PASSWORD=secret
-
-  
