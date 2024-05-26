@@ -42,7 +42,7 @@ model History {
 
   // Relations
   variableId String
-  variable   Variable @relation(fields: [variableId], references: [id])
+  variable   Variable @relation(fields: [variableId], references: [id], onDelete: Cascade)
 }
 
 model Tag {

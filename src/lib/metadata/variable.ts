@@ -19,19 +19,19 @@ import { Types, BadgeColor } from './types'
  * @return - a boolean value indicating if the variable type is valid
  */
 function validateVariableType(value: string, type: string) {
-  // Type can only be present in enumerate
-  if (type && !Object.values(Types).includes(type as Types)) {
-    throw new Error('Invalid variable type')
-  }
+    // Type can only be present in enumerate
+    if (type && !Object.values(Types).includes(type as Types)) {
+        throw new Error('Invalid variable type')
+    }
 
-  switch (type) {
-    case Types.INTEGER:
-      return !isNaN(parseInt(value))
-    case Types.FLOAT:
-      return !isNaN(parseFloat(value))
-    default:
-      return true
-  }
+    switch (type) {
+        case Types.INTEGER:
+            return !isNaN(parseInt(value))
+        case Types.FLOAT:
+            return !isNaN(parseFloat(value))
+        default:
+            return true
+    }
 }
 
 /**
@@ -47,48 +47,48 @@ function validateVariableType(value: string, type: string) {
  * @return - the created variable object
  */
 export const createVariable = async ({
-  name,
-  description,
-  value,
-  defaultValue,
-  type,
-  selector,
+    name,
+    description,
+    value,
+    defaultValue,
+    type,
+    selector,
 }: Prisma.VariableCreateInput) => {
-  if (!validateVariableType(value as string, type as Types)) {
-    throw new Error('Invalid value for variable type')
-  }
-
-  try {
-    const res = await prisma.variable.create({
-      data: {
-        name,
-        description,
-        value,
-        defaultValue,
-        type,
-        selector,
-        history: {
-          create: {
-            value,
-          },
-        },
-      },
-    })
-
-    // Revalidate the cache
-    revalidateTag('variable')
-
-    // Write redis
-    writeConfigs(name, value, type)
-
-    return res
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      if (err.code === 'P2002') {
-        throw new Error('Variable with that name already exists')
-      }
+    if (!validateVariableType(value as string, type as Types)) {
+        throw new Error('Invalid value for variable type')
     }
-  }
+
+    try {
+        const res = await prisma.variable.create({
+            data: {
+                name,
+                description,
+                value,
+                defaultValue,
+                type,
+                selector,
+                history: {
+                    create: {
+                        value,
+                    },
+                },
+            },
+        })
+
+        // Revalidate the cache
+        revalidateTag('variable')
+
+        // Write redis
+        writeConfigs(name, value, type)
+
+        return res
+    } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            if (err.code === 'P2002') {
+                throw new Error('Variable with that name already exists')
+            }
+        }
+    }
 }
 
 /**
@@ -98,16 +98,16 @@ export const createVariable = async ({
  * @return - the variable object
  */
 export const getVariable = unstable_cache(
-  async ({ id }: Prisma.VariableWhereUniqueInput): Promise<Variable | null> => {
-    return await prisma.variable.findUnique({
-      where: { id },
-      include: {
-        tags: true,
-      },
-    })
-  },
-  ['variable'],
-  { tags: ['variable'] },
+    async ({ id }: Prisma.VariableWhereUniqueInput): Promise<Variable | null> => {
+        return await prisma.variable.findUnique({
+            where: { id },
+            include: {
+                tags: true,
+            },
+        })
+    },
+    ['variable'],
+    { tags: ['variable'] },
 )
 
 /**
@@ -116,15 +116,15 @@ export const getVariable = unstable_cache(
  * @return - an array of variable objects
  */
 export const getVariables = unstable_cache(
-  async (): Promise<Variable[]> => {
-    return await prisma.variable.findMany({
-      include: {
-        tags: true,
-      },
-    })
-  },
-  ['variables'],
-  { tags: ['variable'] },
+    async (): Promise<Variable[]> => {
+        return await prisma.variable.findMany({
+            include: {
+                tags: true,
+            },
+        })
+    },
+    ['variables'],
+    { tags: ['variable'] },
 )
 
 /**
@@ -140,44 +140,44 @@ export const getVariables = unstable_cache(
  * @return - the updated variable object
  */
 export const updateVariable = async ({
-  id,
-  name,
-  description,
-  value,
-  type,
-  selector,
+    id,
+    name,
+    description,
+    value,
+    type,
+    selector,
 }: Prisma.VariableUpdateInput) => {
-  if (!id) {
-    throw new Error('ID is required')
-  }
+    if (!id) {
+        throw new Error('ID is required')
+    }
 
-  // Validate if the variable type and value are correct
-  if (!validateVariableType(value as string, type as Types)) {
-    throw new Error('Invalid value for variable type')
-  }
+    // Validate if the variable type and value are correct
+    if (!validateVariableType(value as string, type as Types)) {
+        throw new Error('Invalid value for variable type')
+    }
 
-  // If no value is present then just update variable
-  const res = await prisma.variable.update({
-    where: { id: id as string },
-    data: { name, description, type, selector },
-  })
-
-  // Else create a new history entry and update it in redis
-  if (value) {
-    await prisma.history.create({
-      data: {
-        value: value as string,
-        variableId: id as string,
-      },
+    // If no value is present then just update variable
+    const res = await prisma.variable.update({
+        where: { id: id as string },
+        data: { name, description, type, selector },
     })
 
-    // Update the variable in redis as well
-    writeConfigs(name as string, value as string, type as string)
-  }
+    // Else create a new history entry and update it in redis
+    if (value) {
+        await prisma.history.create({
+            data: {
+                value: value as string,
+                variableId: id as string,
+            },
+        })
 
-  revalidateTag('variable')
+        // Update the variable in redis as well
+        writeConfigs(name as string, value as string, type as string)
+    }
 
-  return res
+    revalidateTag('variable')
+
+    return res
 }
 
 /**
@@ -186,13 +186,13 @@ export const updateVariable = async ({
  * @param id - the ID of the variable
  */
 export const deleteVariable = async ({
-  id,
+    id,
 }: Prisma.VariableWhereUniqueInput) => {
-  await prisma.variable.delete({
-    where: { id },
-  })
+    await prisma.variable.delete({
+        where: { id },
+    })
 
-  revalidateTag('variable')
+    revalidateTag('variable')
 }
 
 /* 
@@ -206,63 +206,63 @@ export const deleteVariable = async ({
  * @return - a boolean value indicating if the color is valid
  */
 function isValidColor(color: string) {
-  return (
-    !/^#[0-9A-F]{6}$/i.test(color) ||
-    Object.values(BadgeColor).includes(color as BadgeColor)
-  )
+    return (
+        !/^#[0-9A-F]{6}$/i.test(color) ||
+        Object.values(BadgeColor).includes(color as BadgeColor)
+    )
 }
 
 export const createTag = async ({ name, color }: Prisma.TagCreateInput) => {
-  if (!isValidColor(color)) {
-    throw new Error('Invalid color format')
-  }
-
-  try {
-    return await prisma.tag.create({
-      data: {
-        name,
-        color,
-      },
-    })
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      if (err.code === 'P2002') {
-        throw new Error('Tag with that name already exists')
-      }
+    if (!isValidColor(color)) {
+        throw new Error('Invalid color format')
     }
-  }
+
+    try {
+        return await prisma.tag.create({
+            data: {
+                name,
+                color,
+            },
+        })
+    } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            if (err.code === 'P2002') {
+                throw new Error('Tag with that name already exists')
+            }
+        }
+    }
 }
 
 export const editTagColor = async ({ id, color }: Prisma.TagUpdateInput) => {
-  if (color && !isValidColor(color as string)) {
-    throw new Error('Invalid color format')
-  }
+    if (color && !isValidColor(color as string)) {
+        throw new Error('Invalid color format')
+    }
 
-  return await prisma.tag.update({
-    where: { id: id as string },
-    data: { color },
-  })
+    return await prisma.tag.update({
+        where: { id: id as string },
+        data: { color },
+    })
 }
 
 export const deleteTag = async ({ id }: Prisma.TagWhereUniqueInput) => {
-  return await prisma.tag.delete({
-    where: { id },
-  })
+    return await prisma.tag.delete({
+        where: { id },
+    })
 }
 
 export const addTagToVariable = async ({
-  variableId,
-  tagId,
+    variableId,
+    tagId,
 }: {
-  variableId: string
-  tagId: string
+    variableId: string
+    tagId: string
 }) => {
-  return await prisma.variable.update({
-    where: { id: variableId },
-    data: {
-      tags: {
-        connect: { id: tagId },
-      },
-    },
-  })
+    return await prisma.variable.update({
+        where: { id: variableId },
+        data: {
+            tags: {
+                connect: { id: tagId },
+            },
+        },
+    })
 }
