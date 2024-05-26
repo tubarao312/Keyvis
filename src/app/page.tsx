@@ -1,9 +1,11 @@
+import { auth } from '@/auth'
 import { VariableCard } from './VariableCard/VariableCard'
 
 import { getVariables, createVariable } from '@/lib/metadata/variable'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
 
 export default async function Home() {
+  // const session = await auth()
   const variables = await getVariables()
 
   const createNewVariable = async () => {
