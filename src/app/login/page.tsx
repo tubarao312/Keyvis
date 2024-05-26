@@ -4,12 +4,9 @@ export default async function Page() {
     return (
         <div>
             <form action={
-                async (formData: FormData) => {
-                    "use server";
-                    const username = formData.get('username') as string;
-                    const password = formData.get('password') as string;
-                    
-                    await signIn();
+                async (formData) => {
+                    "use server";                    
+                    await signIn("credentials", formData);
                 }
             }>
                 <label>
