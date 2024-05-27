@@ -1,11 +1,17 @@
 'use server'
 
-import { Prisma, Variable } from '@prisma/client'
+import { Prisma, Variable, DropdownOption, Tag } from '@prisma/client'
 import prisma from '@/lib/prisma'
 
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { writeConfigs } from '@/lib/redis/writeConfigs'
 import { Types, BadgeColor } from './types'
+
+// Has all the information about a variable but also the tags and options
+export type VariableExt = Variable & {
+  tags: Tag[]
+  options: DropdownOption[]
+}
 
 /* 
     VARIABLE CRUD OPERATIONS
@@ -98,13 +104,16 @@ export const createVariable = async ({
  * @return - the variable object
  */
 export const getVariable = unstable_cache(
-  async ({ id }: Prisma.VariableWhereUniqueInput): Promise<Variable | null> => {
-    return await prisma.variable.findUnique({
+  async ({
+    id,
+  }: Prisma.VariableWhereUniqueInput): Promise<VariableExt | null> => {
+    return (await prisma.variable.findUnique({
       where: { id },
       include: {
         tags: true,
+        options: true,
       },
-    })
+    })) as VariableExt | null
   },
   ['variable'],
   { tags: ['variable'] },
@@ -116,14 +125,15 @@ export const getVariable = unstable_cache(
  * @return - an array of variable objects
  */
 export const getVariables = unstable_cache(
-  async (): Promise<Variable[]> => {
-    return await prisma.variable.findMany({
+  async (): Promise<VariableExt[]> => {
+    return (await prisma.variable.findMany({
       include: {
         tags: true,
+        options: true,
       },
-    })
+    })) as VariableExt[] | []
   },
-  ['variables'],
+  ['variable'],
   { tags: ['variable'] },
 )
 
@@ -153,7 +163,7 @@ export const updateVariable = async ({
 
   // Validate if the variable type and value are correct
   if (!validateVariableType(value as string, type as Types)) {
-    throw new Error('Invalid value for variable type')
+    throw new Error(`Invalid value (${value}) for variable type ${type}`)
   }
 
   // If no value is present then just update variable
@@ -178,6 +188,29 @@ export const updateVariable = async ({
   revalidateTag('variable')
 
   return res
+}
+
+export const updateVariableOptions = async ({
+  id,
+  options,
+}: {
+  id: string
+  options: string[]
+}) => {
+  // Delete all old options
+  await prisma.dropdownOption.deleteMany({ where: { variableId: id } })
+
+  // Create the new options
+  const newOptions = options.map((option) => ({
+    variableId: id,
+    value: option,
+  }))
+
+  await prisma.dropdownOption.createMany({
+    data: newOptions,
+  })
+
+  revalidateTag('variable')
 }
 
 /**

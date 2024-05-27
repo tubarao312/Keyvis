@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Badge, BadgeColor } from './Badge'
 import {
   CheckCircleIcon,
@@ -17,9 +17,15 @@ import {
 import { Radio, RadioGroup } from '@headlessui/react'
 import ButtonPatternBackground from './ButtonPatternBackground'
 
-import { Variable } from '@prisma/client';
-import { Selectors, Types } from '@/lib/metadata/types';
-import { deleteVariable, updateVariable } from '@/lib/metadata/variable';
+import { Variable } from '@prisma/client'
+import { Selectors, Types } from '@/lib/metadata/types'
+import {
+  deleteVariable,
+  updateVariable,
+  updateVariableOptions,
+} from '@/lib/metadata/variable'
+
+import type { VariableExt } from '@/lib/metadata/variable'
 
 /**
  * Contains the name and color of a tag for a variable
@@ -78,7 +84,7 @@ const VARIABLE_TYPES = [
 ]
 
 interface VariableContentProps {
-  variable: Variable
+  variable: VariableExt
   toggleEdit: () => void
 }
 
@@ -98,25 +104,54 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
    * this state to update the variable.
    */
   const [newVariable, setNewVariable] = useState(variable)
+  const [options, setOptions] = useState<string[]>([])
+
+  // On load, set the options to the current options
+  useEffect(() => {
+    const newOptions = newVariable.options.map((option) => option.value)
+    setOptions(newOptions)
+  }, [])
+
+  const handleDeleteOption = useCallback(
+    (index: number) => {
+      const newOptions = [...options]
+      newOptions.splice(index, 1)
+      setOptions(newOptions)
+    },
+    [options],
+  )
+
+  const handleAddOption = useCallback(() => {
+    setOptions([...options, ''])
+  }, [options])
+
+  const handleUpdateOption = useCallback(
+    (index: number, value: string) => {
+      const newOptions = [...options]
+      newOptions[index] = value
+      setOptions(newOptions)
+    },
+    [options],
+  )
 
   const handleSave = async () => {
-    // Create object with the different parameters from the newVariable state 
-    
+    // Create object with the different parameters from the newVariable state
+
     //@TODO Replace this mess with zod validation and useForm
     const updatedVariable = {
       id: newVariable.id,
       name: newVariable.name,
       description: newVariable.description,
-      value: newVariable.value === variable.value ? undefined : newVariable.value,
+      value: variable.value,
       type: newVariable.type,
       selector: newVariable.selector,
     }
 
     try {
-      // Save the variable
+      // Save the variable and options if they exist
       await updateVariable(updatedVariable)
+      await updateVariableOptions({ id: newVariable.id, options })
     } catch (error) {
-
       // For now just log into the console
       console.error('Error saving variable:', error)
     }
@@ -186,7 +221,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
             onChange={(e) =>
               setNewVariable({ ...newVariable, description: e.target.value })
             }
-            value={newVariable.description?? ""}
+            value={newVariable.description ?? ''}
           />
         </div>
 
@@ -230,7 +265,6 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
 
         {/* Change the value depending on the type of variable that it is */}
         <div className="flex flex-col gap-2">
-
           {/* Only free input type is currently supported  */}
           {newVariable.selector === Selectors.FREE_INPUT && (
             <>
@@ -238,11 +272,12 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
               <RadioGroup
                 className="flex flex-row gap-4"
                 value={newVariable.type}
-                onChange={(value) => 
-                    setNewVariable({
-                      ...newVariable,
-                      type: value,
-                    })}
+                onChange={(value) =>
+                  setNewVariable({
+                    ...newVariable,
+                    type: value,
+                  })
+                }
               >
                 {VARIABLE_TYPES.map((option, index) => (
                   <Radio
@@ -265,60 +300,32 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
               </RadioGroup>
             </>
           )}
-          
+
           {/* Ignore Dropdown type for now */}
-          {/* {newVariable.selector === Selectors.DROPDOWN && (
+          {newVariable.selector === Selectors.DROPDOWN && (
             <>
               <h2 className="text-base font-semibold">Dropdown</h2>
               <div className="flex flex-col gap-2" id="variableTypeDropdown">
-                {newVariable.value.type.options?.map((option, index) => {
+                {options.map((option, index) => {
                   return (
                     <>
-                      <span className="flex flex-row gap-2" key={option}>
+                      <span
+                        className="flex flex-row gap-2"
+                        key={`${option}-${index}`}
+                      >
                         <input
                           className="block w-full max-w-[23rem] rounded-md border-0 bg-transparent px-3 py-1.5 text-zinc-900 shadow-sm outline-none ring-1 ring-inset transition-all duration-75 placeholder:text-zinc-400 focus:border-0 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 dark:text-zinc-200 dark:ring-white/10"
                           placeholder="Example variable option"
                           defaultValue={option}
-                          key={index}
                           id={`option-${index}`}
                           onBlur={(e) => {
-                            // Change current option to new value using index
-                            const newOptions =
-                              newVariable.value.type.options?.map((o, i) =>
-                                i === index ? e.target.value : o,
-                              ) || []
-
-                            setNewVariable({
-                              ...newVariable,
-                              value: {
-                                ...newVariable.value,
-                                type: {
-                                  ...newVariable.value.type,
-                                  options: newOptions,
-                                },
-                              },
-                            })
+                            handleUpdateOption(index, e.target.value)
                           }}
                         />
                         <TrashIcon
                           className="my-auto h-5 w-5 cursor-pointer text-zinc-600 transition-all duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white"
                           onClick={() => {
-                            // Remove current option using the index
-                            const newOptions =
-                              newVariable.value.type.options?.filter(
-                                (_, i) => i !== index,
-                              ) || []
-
-                            setNewVariable({
-                              ...newVariable,
-                              value: {
-                                ...newVariable.value,
-                                type: {
-                                  ...newVariable.value.type,
-                                  options: newOptions,
-                                },
-                              },
-                            })
+                            handleDeleteOption(index)
                           }}
                         />
                       </span>
@@ -328,19 +335,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
                 <button
                   className="group flex h-full w-full max-w-[23rem] flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-zinc-600 outline-dashed outline-1 transition-all duration-150 ease-in-out hover:text-black hover:ring-white/20 data-[checked]:ring-2 dark:text-zinc-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:text-white dark:hover:ring-white/20 dark:data-[checked]:ring-emerald-400"
                   onClick={() => {
-                    // Add new option
-                    const currentOptions = newVariable.value.type.options || []
-
-                    setNewVariable({
-                      ...newVariable,
-                      value: {
-                        ...newVariable.value,
-                        type: {
-                          ...newVariable.value.type,
-                          options: [...currentOptions, ''],
-                        },
-                      },
-                    })
+                    handleAddOption()
                   }}
                 >
                   <PlusIcon className="mr-1.5 h-5 w-5 text-zinc-600 duration-150 ease-in-out group-hover:text-black dark:text-zinc-400 dark:group-hover:text-white " />
@@ -348,7 +343,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
                 </button>
               </div>
             </>
-          )} */}
+          )}
 
           {/* TODO - Add radio group here */}
         </div>
@@ -382,23 +377,22 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
       </p>
       <div className="mt-3 h-[1px] bg-zinc-600/20 dark:bg-zinc-400/20" />
       <span className="mt-3 flex flex-row gap-1.5">
-
         {/* Ignore Tags for now */}
         {/* {variable.tags.map((tag) => (
           <Badge key={tag.name} color={tag.color} text={tag.name} />
         ))} */}
 
-
         <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
         <span className="my-auto ml-auto flex flex-row gap-0.5">
-
-        <form action={async () => {
-          await deleteVariable({ id: variable.id })
-        }}>
-          <button>
-            <TrashIcon className="h-9 w-9 cursor-pointer rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400 dark:hover:text-white" />
-          </button>
-        </form>
+          <form
+            action={async () => {
+              await deleteVariable({ id: variable.id })
+            }}
+          >
+            <button>
+              <TrashIcon className="h-9 w-9 cursor-pointer rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400 dark:hover:text-white" />
+            </button>
+          </form>
           <Cog6ToothIcon
             className="h-9 w-9 cursor-pointer rounded-md p-2 text-zinc-600 transition-all duration-75 ease-in-out hover:bg-zinc-400/10 dark:text-zinc-400 dark:hover:text-white"
             onClick={() => toggleEdit()}
@@ -412,7 +406,7 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
 // Card ___________________________________________________________
 
 interface VariableCardProps {
-  variable: Variable
+  variable: VariableExt
 }
 
 /**
@@ -422,9 +416,7 @@ interface VariableCardProps {
  * @param isEditing Whether the variable is currently being edited.
  * @returns The VariableCard component.
  */
-const VariableCard: React.FC<VariableCardProps> = ({
-  variable,
-}) => {
+const VariableCard: React.FC<VariableCardProps> = ({ variable }) => {
   const [beingEdited, setBeingEdited] = useState(false) // This state is passed down from the higher component so it can be disabled from above
   const handleToggleEdit = (edit: boolean) => {
     // if (edit) onStartEditing(variable)
@@ -454,10 +446,4 @@ const VariableCard: React.FC<VariableCardProps> = ({
   )
 }
 
-export {
-  type Variable,
-  type VariableTag,
-  Types,
-  Selectors,
-  VariableCard,
-}
+export { type Variable, type VariableTag, Types, Selectors, VariableCard }

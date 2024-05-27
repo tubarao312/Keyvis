@@ -7,16 +7,16 @@ export default async function Home() {
   const variables = await getVariables()
 
   const createNewVariable = async () => {
-    "use server";
+    'use server'
 
     await createVariable({
       name: `New Variable #${variables.length + 1}`,
-      description: "",
-      value: "",
-      defaultValue: "",
-      type: "String",
-      selector: "FreeInput",
-    });
+      description: '',
+      value: '',
+      defaultValue: '',
+      type: 'String',
+      selector: 'FreeInput',
+    })
   }
 
   return (
@@ -27,11 +27,9 @@ export default async function Home() {
           <VariableCard variable={variable} key={variable.id} />
         ))}
         <form action={createNewVariable}>
-          <button
-            className="flex h-20 w-full items-center rounded-md border-2 border-dashed border-zinc-800 dark:border-zinc-400"
-          >
-            <h1 className="m-auto flex flex-row items-center gap-2 text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              <PlusCircleIcon className="inline-block h-7 w-7" />
+          <button className="group flex h-20 w-full items-center rounded-md outline-dashed outline-1 transition-all duration-150 ease-in-out dark:text-zinc-400 dark:ring-zinc-400/10 dark:hover:bg-zinc-600/10 dark:hover:text-white  dark:hover:ring-white/20">
+            <h1 className="m-auto flex flex-row items-center gap-2 text-xl font-semibold">
+              <PlusCircleIcon className="mt-0.5 inline-block h-7 w-7" />
               Add a new variable
             </h1>
           </button>
