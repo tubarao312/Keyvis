@@ -120,12 +120,11 @@ export const getVariables = unstable_cache(
 )
 
 /**
- * Update the variable with the specified ID and update the value in redis
+ * Update the variable with the specified ID, only the non value properties
  *
  * @param id - the ID of the variable
  * @param name - the name of the variable
  * @param description - the description of the variable
- * @param value - the value of the variable
  * @param type - the type of the variable
  * @param selector - the selector of the variable
  * @param alias - the alias of the variable
@@ -179,6 +178,59 @@ export const updateVariableOptions = async ({
 }
 
 /**
+ * Update the variable value with the specified ID and update the value in redis
+ *
+ * @param id - the ID of the variable
+ * @param value - the value of the variable
+ *
+ * @return - the updated variable object
+ */
+export const updateVariableValue = async ({
+  id,
+  value,
+}: Prisma.VariableUpdateInput) => {
+  if (!id) {
+    throw new Error('ID is required')
+  }
+
+  const variable = await prisma.variable.findUnique({
+    where: { id: id as string },
+  })
+
+  // Check if variable exists beforehand
+  if (!variable) {
+    throw new Error('Variable not found')
+  }
+
+  // Validate if the variable type and value are correct
+  if (!validateVariableType(value as string, variable.type as Types)) {
+    throw new Error('Invalid value for variable type')
+  }
+
+  // Create a new history entry and update it in redis
+  await prisma.history.create({
+    data: {
+      value: value as string,
+      variableId: id as string,
+    },
+  })
+
+  // Update the variable in redis as well
+  writeConfigs(
+    variable.name as string,
+    value as string,
+    variable.type as string,
+  )
+
+  revalidateTag('variable')
+
+  return await prisma.variable.update({
+    where: { id: id as string },
+    data: { value },
+  })
+}
+
+/**
  * Delete the variable with the specified ID
  *
  * @param id - the ID of the variable
@@ -186,6 +238,14 @@ export const updateVariableOptions = async ({
 export const deleteVariable = async ({
   id,
 }: Prisma.VariableWhereUniqueInput) => {
+  const variable = await prisma.variable.findUnique({
+    where: { id },
+  })
+
+  if (!variable) {
+    throw new Error('Variable not found')
+  }
+
   await prisma.variable.delete({
     where: { id },
   })
