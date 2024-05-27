@@ -18,19 +18,6 @@
           "isId": true
         },
         {
-          "id": "History.variableId",
-          "name": "variableId",
-          "columnName": "variableId",
-          "type": "text",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false
-        },
-        {
           "id": "History.value",
           "name": "value",
           "columnName": "value",
@@ -54,6 +41,19 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": true,
+          "isId": false
+        },
+        {
+          "id": "History.variableId",
+          "name": "variableId",
+          "columnName": "variableId",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
           "isId": false
         },
         {

@@ -45,8 +45,6 @@ function validateVariableType(value: string, type: string) {
  *
  * @param name - the name of the variable
  * @param description - the description of the variable
- * @param value - the value of the variable
- * @param defaultValue - the default value of the variable
  * @param type - the type of the variable
  * @param selector - the selector of the variable
  *
@@ -55,37 +53,21 @@ function validateVariableType(value: string, type: string) {
 export const createVariable = async ({
   name,
   description,
-  value,
-  defaultValue,
   type,
   selector,
 }: Prisma.VariableCreateInput) => {
-  if (!validateVariableType(value as string, type as Types)) {
-    throw new Error('Invalid value for variable type')
-  }
-
   try {
     const res = await prisma.variable.create({
       data: {
         name,
         description,
-        value,
-        defaultValue,
         type,
         selector,
-        history: {
-          create: {
-            value,
-          },
-        },
       },
     })
 
     // Revalidate the cache
     revalidateTag('variable')
-
-    // Write redis
-    writeConfigs(name, value, type)
 
     return res
   } catch (err) {
@@ -154,7 +136,6 @@ export const updateVariable = async ({
   id,
   name,
   description,
-  value,
   type,
   selector,
   alias,
@@ -163,31 +144,11 @@ export const updateVariable = async ({
     throw new Error('ID is required')
   }
 
-  // Validate if the variable type and value are correct
-  if (!validateVariableType(value as string, type as Types)) {
-    throw new Error(`Invalid value (${value}) for variable type ${type}`)
-  }
-
-  console.log(`Updating variable ${id} with name ${name} and alias ${alias}`)
-
   // If no value is present then just update variable
   const res = await prisma.variable.update({
     where: { id: id as string },
     data: { name, description, type, selector, alias },
   })
-
-  // Else create a new history entry and update it in redis
-  if (value) {
-    await prisma.history.create({
-      data: {
-        value: value as string,
-        variableId: id as string,
-      },
-    })
-
-    // Update the variable in redis as well
-    writeConfigs(name as string, value as string, type as string)
-  }
 
   revalidateTag('variable')
 
