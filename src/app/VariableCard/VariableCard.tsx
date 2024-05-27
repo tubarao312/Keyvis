@@ -37,6 +37,29 @@ interface VariableTag {
 
 // Content ________________________________________________________
 
+interface VariableAliasCopyProps {
+  alias: string
+}
+
+const VariableAliasClipboard: React.FC<VariableAliasCopyProps> = ({
+  alias,
+}) => {
+  return (
+    <span className="flex flex-row gap-1">
+      <p className="my-auto w-fit font-mono text-sm text-zinc-600 lg:mx-0 dark:text-zinc-400">
+        {alias}
+      </p>
+      {alias != '' ? (
+        <ClipboardIcon
+          className="my-auto ml-1 h-5 w-5 cursor-pointer text-zinc-600 transition-all
+          duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white
+          "
+        />
+      ) : null}
+    </span>
+  )
+}
+
 interface VariableSelectorRadioOption {
   name: string
   description: string
@@ -145,6 +168,7 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
       value: variable.value,
       type: newVariable.type,
       selector: newVariable.selector,
+      alias: newVariable.alias,
     }
 
     try {
@@ -188,25 +212,36 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
         {/* Variable Name */}
         <div className="flex flex-col gap-2">
           <h2 className="text-base font-semibold">Variable Name</h2>
-          <span className="flex w-full flex-col gap-2 lg:flex-row">
+          <input
+            id="variable-name"
+            className="block w-full max-w-[23rem] rounded-md border-0 bg-transparent px-3 py-1.5 text-zinc-900 shadow-sm outline-none ring-1 ring-inset transition-all duration-75 placeholder:text-zinc-400 focus:border-0 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 dark:text-zinc-200 dark:ring-white/10"
+            placeholder="Example Variable Name"
+            value={newVariable.name}
+            onChange={(e) =>
+              setNewVariable({ ...newVariable, name: e.target.value })
+            }
+          />
+        </div>
+
+        {/* Variable Alias */}
+        <div className="flex flex-col">
+          <h2 className="text-base font-semibold">Variable Alias</h2>
+          <p className="mt-1 max-w-[40rem] text-sm text-zinc-600 dark:text-zinc-400">
+            The alias is used to reference this variable in the code. Naming
+            convetion should be uppercase with underscores, like a constant.
+          </p>
+          <span className="mt-2 flex w-full flex-col gap-2 lg:flex-row">
             <input
-              id="variable-name"
+              id="variable-alias"
               className="block w-full max-w-[23rem] rounded-md border-0 bg-transparent px-3 py-1.5 text-zinc-900 shadow-sm outline-none ring-1 ring-inset transition-all duration-75 placeholder:text-zinc-400 focus:border-0 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 dark:text-zinc-200 dark:ring-white/10"
-              placeholder="Example Variable Name"
-              value={newVariable.name}
+              placeholder="EXAMPLE_VARIABLE_ALIAS"
+              value={newVariable.alias}
               onChange={(e) =>
-                setNewVariable({ ...newVariable, name: e.target.value })
+                setNewVariable({ ...newVariable, alias: e.target.value })
               }
             />
-            <span className="flex flex-row gap-1">
-              <p className="my-auto w-fit font-mono text-sm text-zinc-600 lg:mx-0 dark:text-zinc-400">
-                {newVariable.name}
-              </p>
-              <ClipboardIcon
-                className="my-auto ml-1 h-5 w-5 cursor-pointer text-zinc-600 transition-all
-          duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white
-          "
-              />
+            <span className="hidden items-center lg:flex">
+              <VariableAliasClipboard alias={newVariable.alias} />
             </span>
           </span>
         </div>
@@ -371,6 +406,9 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
           {variable.value}
         </h2>
         <PencilIcon className="h-4 w-4 cursor-pointer text-zinc-600 transition-all duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white" />
+        <span className="ml-auto mr-2">
+          <VariableAliasClipboard alias={variable.alias} />
+        </span>
       </span>
       <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
         {variable.description}

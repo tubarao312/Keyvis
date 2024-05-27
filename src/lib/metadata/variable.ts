@@ -146,6 +146,7 @@ export const getVariables = unstable_cache(
  * @param value - the value of the variable
  * @param type - the type of the variable
  * @param selector - the selector of the variable
+ * @param alias - the alias of the variable
  *
  * @return - the updated variable object
  */
@@ -156,6 +157,7 @@ export const updateVariable = async ({
   value,
   type,
   selector,
+  alias,
 }: Prisma.VariableUpdateInput) => {
   if (!id) {
     throw new Error('ID is required')
@@ -166,10 +168,12 @@ export const updateVariable = async ({
     throw new Error(`Invalid value (${value}) for variable type ${type}`)
   }
 
+  console.log(`Updating variable ${id} with name ${name} and alias ${alias}`)
+
   // If no value is present then just update variable
   const res = await prisma.variable.update({
     where: { id: id as string },
-    data: { name, description, type, selector },
+    data: { name, description, type, selector, alias },
   })
 
   // Else create a new history entry and update it in redis

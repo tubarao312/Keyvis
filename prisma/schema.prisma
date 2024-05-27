@@ -14,6 +14,7 @@ datasource db {
 model Variable {
   id    String @id @default(cuid())
   name  String @unique
+  alias String @unique @default(cuid()) // Unique identifier for the variable
   value String
 
   // Meta
