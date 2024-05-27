@@ -31,6 +31,17 @@ model Variable {
   // Relations
   history History[]
   tags    Tag[]
+  options DropdownOption[]
+}
+
+model DropdownOption {
+  id          String @id @default(cuid())
+  
+  value       String
+
+  // Relations
+  variableId  String // Foreign Key
+  variable Variable @relation(fields: [variableId], references: [id])
 }
 
 model History {
