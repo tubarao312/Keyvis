@@ -1,21 +1,22 @@
 import { auth } from "@/auth"
-import { NextResponse } from "next/server"
 
-// export { auth as middleware } from "@/auth"
+const authRoutes = ["/login", "/register"];
 
 export default auth((req) => {
+    const isLoggedIn = !!req.auth;
+    const isAuthRoute = authRoutes.includes(req.nextUrl.pathname);
+    const isApiAuthRouter = req.nextUrl.pathname.startsWith("/api/auth");
 
-    // If the user is not authenticated take them to the login page
-    if (!req.auth) {
-        // Get the base url
-        const url = new URL(req.url)
-
-        // Redirect to the login page
-        const fullUrl = `${url.protocol}//${url.host}/login`
-        return NextResponse.redirect(fullUrl)
+    // If user is logged in or is trying to access an auth route, allow access
+    if (isApiAuthRouter || isAuthRoute || isLoggedIn) {
+        return;
     }
-})
+
+    // Redirect to login page if user is not logged in
+    return Response.redirect(new URL("/login", req.nextUrl));
+});
+
 
 export const config = {
-    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"]
-}
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};

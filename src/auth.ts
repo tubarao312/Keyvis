@@ -5,9 +5,7 @@ import Credentials from "next-auth/providers/credentials"
 import prisma from "@/lib/prisma"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-    adapter: PrismaAdapter({
-        prisma: prisma,
-    }),
+    adapter: PrismaAdapter(prisma),
     providers: [
         Credentials({
             id: "credentials",
@@ -21,6 +19,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             async authorize(credentials) {
                 const { username, password } = credentials;
+
+                console.log(credentials);
 
                 return null;
             },
