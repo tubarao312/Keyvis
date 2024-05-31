@@ -34,6 +34,7 @@
     "@types/react-highlight-words": "^0.16.4",
     "acorn": "^8.8.1",
     "autoprefixer": "^10.4.7",
+    "bcrypt": "^5.1.1",
     "clsx": "^2.1.0",
     "fast-glob": "^3.3.0",
     "flexsearch": "^0.7.31",
@@ -56,6 +57,7 @@
     "typescript": "^5.3.3",
     "unist-util-filter": "^5.0.1",
     "unist-util-visit": "^5.0.0",
+    "zod": "^3.23.8",
     "zustand": "^4.3.2"
   },
   "devDependencies": {
