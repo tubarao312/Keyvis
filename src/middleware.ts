@@ -1,22 +1,23 @@
-import { auth } from "@/auth"
+import NextAuth from 'next-auth';
+import { authConfig } from '@/auth.config';
 
-const authRoutes = ["/login", "/register"];
+const { auth } = NextAuth(authConfig);
+
+const PUBLIC_ROUTES = ["/login", "/register"];
 
 export default auth((req) => {
-    const isLoggedIn = !!req.auth;
-    const isAuthRoute = authRoutes.includes(req.nextUrl.pathname);
-    const isApiAuthRouter = req.nextUrl.pathname.startsWith("/api/auth");
+    const { nextUrl } = req;
 
-    // If user is logged in or is trying to access an auth route, allow access
-    if (isApiAuthRouter || isAuthRoute || isLoggedIn) {
-        return;
-    }
+    const isAuthenticated = !!req.auth;
+    const isPublicRoute = PUBLIC_ROUTES.includes(nextUrl.pathname);
 
-    // Redirect to login page if user is not logged in
-    return Response.redirect(new URL("/login", req.nextUrl));
+    if (isPublicRoute && isAuthenticated)
+        return Response.redirect(new URL("/", nextUrl));
+
+    if (!isAuthenticated && !isPublicRoute)
+        return Response.redirect(new URL("/login", nextUrl));
 });
 
-
 export const config = {
-    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

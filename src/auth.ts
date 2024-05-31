@@ -1,3 +1,4 @@
+import { authConfig } from '@/auth.config';
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
@@ -7,6 +8,7 @@ import { loginUser } from "@/lib/auth/auth"
 import { UserLoginSchema } from "@/lib/auth/types"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+    ...authConfig,
     adapter: PrismaAdapter(prisma),
     providers: [
         Credentials({
@@ -21,10 +23,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             async authorize(credentials) {
                 // Safely parse all the user credentials
-                const data = UserLoginSchema.parse(credentials)
+                const data = await UserLoginSchema.parseAsync(credentials);
 
                 // Login the user
-                return loginUser(data);
+                const user = await loginUser(data);
+
+                return user ?? null;
             },
         }),
     ],

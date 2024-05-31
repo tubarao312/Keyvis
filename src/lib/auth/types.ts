@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Define UserLogin and UserRegister schemas
-export const UserRegisterSchema = z.object({
+export const userRegisterSchema = z.object({
     email: z.string().email(),
     password: z
         .string({
@@ -12,10 +12,10 @@ export const UserRegisterSchema = z.object({
         .max(100, "Password is too long"),
 });
 
-export const UserLoginSchema = z.object({
+export const userLoginSchema = z.object({
     email: z.string().email(),
     password: z.string(),
 });
 
-export interface UserLogin extends z.infer<typeof UserLoginSchema> { }
-export interface UserRegister extends z.infer<typeof UserRegisterSchema> { }
+export interface UserLogin extends z.infer<typeof userLoginSchema> { }
+export interface UserRegister extends z.infer<typeof userRegisterSchema> { }

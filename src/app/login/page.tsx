@@ -1,18 +1,23 @@
-import { signIn } from "@/auth"
+import { useFormState } from "react-dom";
 
-export default async function Page() {
+import { login } from "@/lib/auth/auth";
+
+const initialState = {
+    message: '',
+    errors: {
+        email: '',
+        password: '',
+        credentials: '',
+        unknown: '',
+    },
+} 
+
+export default function Page() {
+    const [formState, formAction] = useFormState(login, initialState);
+
     return (
         <div>
-            <form action={
-                async (formData) => {
-                    "use server"; 
-                    try {
-                        await signIn("credentials", formData);
-                    } catch (error) {
-                        console.error(error);
-                    }              
-                }
-            }>
+            <form action={formAction}>
                 <label>
                     Email:
                     <input type="text" name="email" />
