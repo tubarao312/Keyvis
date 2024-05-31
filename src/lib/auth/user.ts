@@ -4,14 +4,27 @@ import bcrypt from "bcryptjs";
 
 import { AuthError } from 'next-auth';
 import { signIn, signOut } from '@/auth';
-import { UserLogin, UserRegister, userLoginSchema } from "@/lib/auth/types";
+import { UserLogin, userLoginSchema, userRegisterSchema } from "@/lib/auth/types";
 
 function hashPassword(password: string) {
     return bcrypt.hash(password, 10);
 }
 
-export const registerUser = async (data: UserRegister) => {
-    const { password, email } = data;
+export const registerUser = async (prevState: any, formData: FormData) => {
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    const data = userRegisterSchema.safeParse({
+        email: email,
+        password: password,
+    });
+
+    if (!data.success) {
+        return {
+            message: 'validation error',
+            errors: data.error.flatten().fieldErrors,
+        };
+    }
 
     // Verify if the user already exists
     const user = await prisma.user.findUnique({
@@ -21,21 +34,29 @@ export const registerUser = async (data: UserRegister) => {
     });
 
     if (user) {
-        throw new Error("User already exists");
+        return {
+            message: 'user already exists',
+            errors: {
+                email: 'user already exists',
+            },
+        };
     }
 
     // Hash the password
     const hashedPassword = await hashPassword(password);
 
     // Create the user
-    const newUser = await prisma.user.create({
+    await prisma.user.create({
         data: {
             email,
             password: hashedPassword,
         },
     });
 
-    return newUser;
+    return {
+        message: 'success',
+        errors: {},
+    };
 }
 
 export const getUser = async (data: UserLogin) => {

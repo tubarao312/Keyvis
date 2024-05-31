@@ -1,32 +1,32 @@
+"use client";
+
 import { registerUser } from "@/lib/auth/user";
-import { userRegisterSchema } from "@/lib/auth/types";
+import { useFormState } from "react-dom";
 
+const initialState = {
+    message: "",
+    errors: {
+        email: "",
+        password: "",
+        credentials: "",
+        unknown: "",
+    },
+};
 
-export default async function Page() {
+export default function Page() {
+    const [state, formAction] = useFormState(registerUser, initialState);
+
     return (
         <div>
-            <form action={
-                async (formData) => {
-                    "use server"; 
-                    try {
-                        const data = userRegisterSchema.parse({
-                            email: formData.get("email") as string,
-                            password: formData.get("password") as string,
-                        });
-
-                        await registerUser(data);
-                    } catch (error) {
-                        console.error(error);
-                    }              
-                }
-            }>
+            <form action={formAction}>
                 <label>
                     Email:
-                    <input type="text" name="email" />
+                    <input required type="text" name="email" />
                 </label>
+                {state.errors.email && <p>{state.errors.email}</p>}
                 <label>
                     Password:
-                    <input type="password" name="password" />
+                    <input required type="password" name="password" />
                 </label>
                 <button type="submit">Submit</button>
             </form>
