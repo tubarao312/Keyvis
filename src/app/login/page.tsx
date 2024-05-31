@@ -2,7 +2,7 @@
 
 import { useFormState } from "react-dom";
 
-import { login } from "@/lib/auth/auth";
+import { login } from "@/lib/auth/user";
 
 const initialState = {
     message: '',

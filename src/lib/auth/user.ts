@@ -84,7 +84,11 @@ export async function login(prevState: any, formData: FormData) {
             };
         }
 
-        await signIn('credentials', formData);
+        await signIn('credentials', {
+            redirectTo: '/',
+            email: email,
+            password: password,
+        });
 
         return {
             message: 'success',
