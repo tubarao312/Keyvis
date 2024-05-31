@@ -3,6 +3,8 @@ import Credentials from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 
 import prisma from "@/lib/prisma"
+import { loginUser } from "@/lib/auth/auth"
+import { UserLoginSchema } from "@/lib/auth/types"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: PrismaAdapter(prisma),
@@ -18,11 +20,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
 
             async authorize(credentials) {
-                const { username, password } = credentials;
+                // Safely parse all the user credentials
+                const data = UserLoginSchema.parse(credentials)
 
-                console.log(credentials);
-
-                return null;
+                // Login the user
+                return loginUser(data);
             },
         }),
     ],

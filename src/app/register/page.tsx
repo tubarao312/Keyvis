@@ -1,4 +1,6 @@
-import { signIn } from "@/auth"
+import { registerUser } from "@/lib/auth/auth";
+import { UserRegisterSchema } from "@/lib/auth/types";
+
 
 export default async function Page() {
     return (
@@ -7,7 +9,12 @@ export default async function Page() {
                 async (formData) => {
                     "use server"; 
                     try {
-                        await signIn("credentials", formData);
+                        const data = UserRegisterSchema.parse({
+                            email: formData.get("email") as string,
+                            password: formData.get("password") as string,
+                        });
+
+                        await registerUser(data);
                     } catch (error) {
                         console.error(error);
                     }              
