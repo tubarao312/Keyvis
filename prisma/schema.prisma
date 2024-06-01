@@ -13,7 +13,7 @@ datasource db {
 
 model Variable {
   id    String @id @default(cuid())
-  name  String @unique
+  name  String
   alias String @unique @default(cuid()) // Unique identifier for the variable
   value String
 
@@ -42,7 +42,7 @@ model DropdownOption {
 
   // Relations
   variableId  String // Foreign Key
-  variable Variable @relation(fields: [variableId], references: [id])
+  variable Variable @relation(fields: [variableId], references: [id], onDelete: Cascade)
 }
 
 model History {

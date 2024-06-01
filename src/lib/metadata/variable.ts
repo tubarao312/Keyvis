@@ -63,6 +63,7 @@ export const createVariable = async ({
         description,
         type,
         selector,
+        value: '',
       },
     })
 

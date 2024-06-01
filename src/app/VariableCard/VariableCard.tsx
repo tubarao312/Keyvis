@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Badge, BadgeColor } from './Badge'
 import {
   CheckCircleIcon,
+  ChevronDownIcon,
   ClipboardIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline'
@@ -14,7 +15,16 @@ import {
   PlusCircleIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline'
-import { Radio, RadioGroup } from '@headlessui/react'
+import {
+  Dialog,
+  DialogPanel,
+  Field,
+  Radio,
+  RadioGroup,
+  Select,
+  Transition,
+  TransitionChild,
+} from '@headlessui/react'
 import ButtonPatternBackground from './ButtonPatternBackground'
 
 import { Variable } from '@prisma/client'
@@ -22,10 +32,12 @@ import { Selectors, Types } from '@/lib/metadata/types'
 import {
   deleteVariable,
   updateVariable,
+  updateVariableValue,
   updateVariableOptions,
 } from '@/lib/metadata/variable'
 
 import type { VariableExt } from '@/lib/metadata/variable'
+import clsx from 'clsx'
 
 /**
  * Contains the name and color of a tag for a variable
@@ -80,12 +92,6 @@ const VARIABLE_SELECTOR_OPTIONS: VariableSelectorRadioOption[] = [
     key: Selectors.DROPDOWN,
     value: Selectors.DROPDOWN,
   },
-  {
-    name: 'Toggle',
-    description: 'True or False value.',
-    key: Selectors.TOGGLE,
-    value: Selectors.TOGGLE,
-  },
 ]
 
 const VARIABLE_TYPES = [
@@ -110,6 +116,8 @@ interface VariableContentProps {
   variable: VariableExt
   toggleEdit: () => void
 }
+
+// Card Content __________________________________________________
 
 /**
  * A form that allows the user to edit a variable's metadata (name & description).
@@ -387,6 +395,235 @@ const EditVariableContent: React.FC<VariableContentProps> = ({
   )
 }
 
+// Edit Variable Value & Inputs __________________________________
+
+interface ValueInputProps {
+  variable: VariableExt
+  value: string
+  onChange: (value: string) => void
+  onClose: () => void
+  onSave: () => void
+}
+
+const ValueFreeInput: React.FC<ValueInputProps> = ({
+  variable,
+  value,
+  onChange,
+  onClose,
+  onSave,
+}) => {
+  const inputMode = useMemo(() => {
+    switch (variable.type) {
+      case Types.INTEGER:
+        return 'numeric'
+      case Types.FLOAT:
+        return 'decimal'
+      default:
+        return 'text'
+    }
+  }, [variable.type])
+
+  const inputType = useMemo(() => {
+    switch (variable.type) {
+      case Types.INTEGER:
+        return 'number'
+      case Types.FLOAT:
+        return 'number'
+      default:
+        return 'text'
+    }
+  }, [variable.type])
+
+  // Validate the input value
+  const isValid = useMemo(() => {
+    switch (variable.type) {
+      case Types.INTEGER:
+        return Number.isInteger(Number(value))
+      case Types.FLOAT:
+        return !Number.isNaN(Number(value))
+      default:
+        return true
+    }
+  }, [variable.type, value])
+
+  return (
+    <>
+      <div
+        className={clsx(
+          'group relative flex h-full w-full items-center rounded-lg bg-zinc-50 shadow-xl ring-1 ring-inset ring-zinc-900/7.5 dark:bg-zinc-900 dark:ring-zinc-800',
+          !isValid && 'ring-red-600 dark:ring-red-400',
+        )}
+      >
+        <PencilIcon className="pointer-events-none absolute left-3 top-0 h-full w-5 stroke-zinc-500" />
+        <input
+          data-autofocus
+          inputMode={inputMode}
+          className={clsx(
+            ' m-1 h-full w-full flex-auto appearance-none bg-transparent pl-10 pr-[5rem] font-mono text-zinc-900 outline-none placeholder:text-zinc-500 focus:w-full focus:flex-none sm:text-sm dark:text-white',
+          )}
+          onKeyDown={(event) => {
+            switch (event.key) {
+              case 'Escape':
+                onClose()
+                break
+              case 'Enter':
+                if (isValid) {
+                  onSave()
+                } else {
+                  console.error('Value is not valid:', value, variable.type)
+                }
+                break
+            }
+          }}
+          defaultValue={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <h3 className="pointer-events-none absolute right-3 my-auto mb-1 text-zinc-500">
+          {variable.type}
+        </h3>
+      </div>
+      <button
+        className="flex h-full flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-emerald-600 ring-1 ring-inset transition-all duration-150 ease-in-out  hover:ring-emerald-600/20  dark:bg-emerald-600/10 dark:text-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-emerald-600/20 dark:hover:ring-emerald-600/50"
+        onClick={
+          isValid
+            ? onSave
+            : () => console.error('Value is not valid:', value, variable.type)
+        }
+      >
+        Save
+        <CheckIcon className="ml-1 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+      </button>
+    </>
+  )
+}
+
+const ValueDropdown: React.FC<ValueInputProps> = ({
+  variable,
+  value,
+  onChange,
+  onClose,
+  onSave,
+}) => {
+  // When this appears for the first time, check if the current value is in the options. If it isn't, set the current value to the first option.
+  const [defaultValue, setDefaultValue] = useState(value)
+  useEffect(() => {
+    if (!variable.options.find((option) => option.value === value)) {
+      onChange(variable.options[0].value)
+      setDefaultValue(variable.options[0].value)
+    }
+  }, [])
+
+  return (
+    <>
+      <div className="group relative flex h-full w-full items-center ">
+        <ChevronDownIcon className="pointer-events-none absolute left-3 top-0 h-full w-5 stroke-zinc-500" />
+        <Select
+          data-autofocus
+          className="h-full w-full appearance-none rounded-lg border-none bg-zinc-50 pl-10 shadow-xl ring-1 ring-inset ring-zinc-900/7.5 focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25 dark:bg-zinc-900 dark:ring-zinc-800"
+          onChange={(e) => onChange(e.target.value)}
+          defaultValue={defaultValue}
+        >
+          {variable.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.value}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <button
+        className="flex h-full flex-row items-center rounded-md px-4 py-1.5 text-sm font-semibold text-emerald-600 ring-1 ring-inset transition-all duration-150 ease-in-out  hover:ring-emerald-600/20  dark:bg-emerald-600/10 dark:text-emerald-400 dark:ring-zinc-400/10 dark:hover:bg-emerald-600/20 dark:hover:ring-emerald-600/50"
+        onClick={onSave}
+      >
+        Save
+        <CheckIcon className="ml-1 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+      </button>
+    </>
+  )
+}
+
+const EditVariableValue: React.FC<VariableExt> = (variable) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [value, setValue] = useState(variable.value)
+
+  /**
+   * Saves the new value of the variable and close the modal.
+   */
+  const handleSave = async () => {
+    try {
+      await updateVariableValue({ id: variable.id, value })
+    } catch (error) {
+      console.error('Error saving variable value:', error)
+    }
+
+    // Update the variable with the new value
+    setIsOpen(false)
+  }
+
+  /**
+   * Cancels the variable editing and closes the modal.
+   */
+  const handleCancel = () => {
+    setIsOpen(false)
+  }
+
+  return (
+    <>
+      <PencilIcon
+        onClick={() => setIsOpen(true)}
+        className="h-4 w-4 cursor-pointer text-zinc-600 transition-all duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white"
+      />
+      <Suspense fallback={null}>
+        <Transition show={isOpen}>
+          <Dialog onClose={setIsOpen} className={clsx('fixed inset-0 z-50')}>
+            <TransitionChild
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-zinc-400/25 backdrop-blur-sm dark:bg-black/40" />
+            </TransitionChild>
+
+            <div className="fixed inset-0 overflow-y-auto px-4 py-32 sm:px-6 md:py-32 lg:px-8 lg:py-[15vh]">
+              <TransitionChild
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <DialogPanel className="mx-auto flex h-12  transform-gpu flex-row items-center gap-2 overflow-hidden sm:max-w-xl">
+                  {variable.selector === Selectors.FREE_INPUT && (
+                    <ValueFreeInput
+                      variable={variable}
+                      value={value}
+                      onChange={setValue}
+                      onClose={handleCancel}
+                      onSave={handleSave}
+                    />
+                  )}
+                  {variable.selector === Selectors.DROPDOWN && (
+                    <ValueDropdown
+                      variable={variable}
+                      value={value}
+                      onChange={setValue}
+                      onClose={handleCancel}
+                      onSave={handleSave}
+                    />
+                  )}
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </Dialog>
+        </Transition>
+      </Suspense>
+    </>
+  )
+}
+
 /**
  * A static card that only allows the user to view the variable's metadata and value.
  * It can edit the tags and value within the card, but not the metadata (name and description)
@@ -405,8 +642,8 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
         <h2 className="font-mono text-lg font-semibold text-emerald-600 dark:text-emerald-400">
           {variable.value}
         </h2>
-        <PencilIcon className="h-4 w-4 cursor-pointer text-zinc-600 transition-all duration-150 ease-in-out hover:text-black dark:text-zinc-400 dark:hover:text-white" />
-        <span className="ml-auto mr-2">
+        <EditVariableValue {...variable} />
+        <span className="ml-auto mr-2 hidden lg:block">
           <VariableAliasClipboard alias={variable.alias} />
         </span>
       </span>
@@ -420,7 +657,7 @@ const ViewVariableContent: React.FC<VariableContentProps> = ({
           <Badge key={tag.name} color={tag.color} text={tag.name} />
         ))} */}
 
-        <PlusCircleIcon className="my-auto h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+        <PlusCircleIcon className="my-auto hidden h-5 w-5 text-zinc-600 dark:text-zinc-400" />
         <span className="my-auto ml-auto flex flex-row gap-0.5">
           <form
             action={async () => {
