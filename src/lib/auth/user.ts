@@ -38,6 +38,7 @@ export const registerUser = async (prevState: any, formData: FormData) => {
             message: 'user already exists',
             errors: {
                 email: 'user already exists',
+                password: '',
             },
         };
     }
@@ -83,11 +84,6 @@ export const getUser = async (data: UserLogin) => {
     return user;
 }
 
-const defaultValues = {
-    email: '',
-    password: '',
-};
-
 export async function login(prevState: any, formData: FormData) {
     try {
         const email = formData.get('email');
@@ -122,7 +118,8 @@ export async function login(prevState: any, formData: FormData) {
                     return {
                         message: 'credentials error',
                         errors: {
-                            ...defaultValues,
+                            email: '',
+                            password: '',
                             credentials: 'incorrect email or password',
                         },
                     };
@@ -130,7 +127,8 @@ export async function login(prevState: any, formData: FormData) {
                     return {
                         message: 'unknown error',
                         errors: {
-                            ...defaultValues,
+                            email: '',
+                            password: '',
                             unknown: 'unknown error',
                         },
                     };

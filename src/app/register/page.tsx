@@ -28,6 +28,7 @@ export default function Page() {
                     Password:
                     <input required type="password" name="password" />
                 </label>
+                {state.errors.password && <p>{state.errors.password}</p>}
                 <button type="submit">Submit</button>
             </form>
         </div>
