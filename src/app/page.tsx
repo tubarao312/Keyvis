@@ -1,11 +1,11 @@
-import { auth } from '@/auth'
-import { VariableCard } from './VariableCard/VariableCard'
+import { auth, signOut } from '@/auth'
+import { VariableCard } from './_components/VariableCard/VariableCard'
 
 import { getVariables, createVariable } from '@/lib/metadata/variable'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
 
 export default async function Home() {
-  // const session = await auth()
+  const session = await auth()
   const variables = await getVariables()
 
   const createNewVariable = async () => {
@@ -23,6 +23,13 @@ export default async function Home() {
 
   return (
     <>
+      <form action={async () => {
+        "use server";
+        await signOut()
+      }}>
+        <button>Sign out</button>
+      </form>
+
       <div className="h-10" />
       <div className="flex flex-col gap-8">
         {variables.map((variable) => (

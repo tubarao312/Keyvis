@@ -84,6 +84,11 @@ export const getUser = async (data: UserLogin) => {
     return user;
 }
 
+const defaultValues = {
+    email: '',
+    password: '',
+}
+
 export async function login(prevState: any, formData: FormData) {
     try {
         const email = formData.get('email');
@@ -118,8 +123,7 @@ export async function login(prevState: any, formData: FormData) {
                     return {
                         message: 'credentials error',
                         errors: {
-                            email: '',
-                            password: '',
+                            ...defaultValues,
                             credentials: 'incorrect email or password',
                         },
                     };
@@ -127,8 +131,7 @@ export async function login(prevState: any, formData: FormData) {
                     return {
                         message: 'unknown error',
                         errors: {
-                            email: '',
-                            password: '',
+                            ...defaultValues,
                             unknown: 'unknown error',
                         },
                     };
